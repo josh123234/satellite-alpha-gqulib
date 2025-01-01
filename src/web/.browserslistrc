@@ -1,0 +1,33 @@
+last 2 versions
+
+# Exclude unsupported/discontinued browsers
+not dead
+
+# Market share threshold for business users
+> 0.5%
+
+# Minimum Chrome version for modern features
+Chrome >= 105
+
+# Minimum Firefox version for performance
+Firefox >= 104
+
+# Minimum Edge version for enterprise users
+Edge >= 105
+
+# Minimum Safari version for macOS users
+Safari >= 15.4
+
+# Minimum iOS Safari for mobile access
+iOS >= 15.4
+
+# Explicitly exclude IE 11
+not IE 11
+
+# Ensure modern JavaScript features support
+not op_mini all
+not kaios 2.5
+not android 4.4.3-4.4.4
+
+# Target modern enterprise environments
+maintained node versions
