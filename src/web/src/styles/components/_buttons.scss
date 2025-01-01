@@ -1,0 +1,202 @@
+// =============================================================================
+// Button Component Styles
+// Core button styles implementing the design system's button variants, states,
+// and responsive behaviors with enhanced accessibility
+// =============================================================================
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// Button Focus Mixin
+// -----------------------------------------------------------------------------
+@mixin button-focus($color: $color-primary, $width: 3px) {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 $width rgba($color, 0.5);
+    position: relative;
+    z-index: map-get($z-index-levels, 'tooltip');
+    
+    // High contrast mode support
+    @media (forced-colors: active) {
+      outline: 2px solid CanvasText;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// Button Variant Mixin
+// -----------------------------------------------------------------------------
+@mixin button-variant($background, $text, $hover-background, $hover-text) {
+  background-color: $background;
+  color: $text;
+  
+  &:hover {
+    background-color: $hover-background;
+    color: $hover-text;
+  }
+  
+  &:active {
+    transform: translateY(1px);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  @include button-focus($background);
+}
+
+// Base Button Class
+// -----------------------------------------------------------------------------
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-family-primary;
+  font-weight: map-get($font-weights, medium);
+  padding: #{$spacing-base * 1.5} #{$spacing-base * 3};
+  border-radius: $spacing-base;
+  transition: all map-get($transition-duration, fast) $transition-timing;
+  cursor: pointer;
+  min-height: 44px; // WCAG touch target size
+  touch-action: manipulation;
+  user-select: none;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  // Icon spacing
+  .icon {
+    margin-right: $spacing-base;
+    
+    @include rtl {
+      margin-right: 0;
+      margin-left: $spacing-base;
+    }
+  }
+
+  // Mobile optimizations
+  @include mobile {
+    padding: #{$spacing-base} #{$spacing-base * 2};
+    font-size: map-get($font-sizes, small);
+  }
+}
+
+// Button Variants
+// -----------------------------------------------------------------------------
+
+// Primary Button
+.btn--primary {
+  @include button-variant(
+    $color-primary,
+    white,
+    darken($color-primary, 10%),
+    white
+  );
+}
+
+// Secondary Button
+.btn--secondary {
+  @include button-variant(
+    $color-secondary,
+    white,
+    darken($color-secondary, 10%),
+    white
+  );
+}
+
+// Outline Button
+.btn--outline {
+  @include button-variant(
+    transparent,
+    $color-primary,
+    rgba($color-primary, 0.1),
+    $color-primary
+  );
+  border: 2px solid currentColor;
+}
+
+// Loading State
+.btn--loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: button-spinner 0.75s linear infinite;
+  }
+}
+
+// Loading Spinner Animation
+@keyframes button-spinner {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Size Variants
+// -----------------------------------------------------------------------------
+.btn--small {
+  padding: #{$spacing-base} #{$spacing-base * 2};
+  min-height: 32px;
+  font-size: map-get($font-sizes, small);
+}
+
+.btn--large {
+  padding: #{$spacing-base * 2} #{$spacing-base * 4};
+  min-height: 52px;
+  font-size: map-get($font-sizes, h5);
+}
+
+// Full Width Variant
+.btn--full {
+  width: 100%;
+}
+
+// Icon-only Button
+.btn--icon {
+  padding: $spacing-base;
+  width: 44px;
+  height: 44px;
+  
+  .icon {
+    margin: 0;
+  }
+}
+
+// Group Buttons
+.btn-group {
+  display: inline-flex;
+  
+  .btn {
+    &:not(:first-child) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    
+    &:not(:last-child) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  }
+}
