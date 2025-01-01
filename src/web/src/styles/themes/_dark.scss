@@ -1,0 +1,102 @@
+// =============================================================================
+// Dark Theme
+// Comprehensive dark mode styling system with accessible color combinations
+// and optimized visual hierarchy for the SaaS Management Platform
+// =============================================================================
+
+@import '../abstracts/variables';
+
+// Dark theme colors
+// -----------------------------------------------------------------------------
+// Base background and surface colors
+$dark-color-background: #111827;  // Dark background for maximum contrast
+$dark-color-surface: #1F2937;     // Primary surface color
+$dark-color-surface-elevated: #374151;  // Elevated surface for cards/dialogs
+
+// Brand colors optimized for dark mode
+$dark-color-primary: #3B82F6;     // Primary brand color (WCAG AA compliant)
+$dark-color-secondary: #60A5FA;   // Secondary brand color
+$dark-color-accent: #93C5FD;      // Accent color for highlights
+
+// Semantic colors
+$dark-color-error: #EF4444;       // Error/danger notifications
+$dark-color-success: #10B981;     // Success/positive feedback
+$dark-color-warning: #F59E0B;     // Warning messages
+$dark-color-info: #3B82F6;        // Informational notifications
+
+// Text colors with different states
+$dark-color-text: (
+  primary: #F9FAFB,    // High contrast for primary text
+  secondary: #D1D5DB,  // Medium contrast for secondary text
+  disabled: #6B7280,   // Low contrast for disabled state
+  inverse: #111827     // Inverse text for dark backgrounds
+);
+
+// Border and divider colors
+$dark-color-border: #374151;      // Border color for containers
+$dark-color-divider: #4B5563;     // Subtle divider lines
+
+// Elevation system with increased opacity for better depth perception
+$dark-elevation-shadows: (
+  surface: none,
+  card: 0 1px 3px rgba(0, 0, 0, 0.3),
+  dialog: 0 4px 6px rgba(0, 0, 0, 0.3),
+  modal: 0 10px 15px rgba(0, 0, 0, 0.3)
+);
+
+// Overlay and focus states
+$dark-color-overlay: rgba(0, 0, 0, 0.5);  // Modal/dialog overlay
+$dark-focus-ring: 0 0 0 2px #{$dark-color-primary};  // Focus state indicator
+
+// Dark theme class definition
+.theme-dark {
+  // Background colors
+  --color-background: #{$dark-color-background};
+  --color-surface: #{$dark-color-surface};
+  --color-surface-elevated: #{$dark-color-surface-elevated};
+  
+  // Brand colors
+  --color-primary: #{$dark-color-primary};
+  --color-secondary: #{$dark-color-secondary};
+  --color-accent: #{$dark-color-accent};
+  
+  // Semantic colors
+  --color-error: #{$dark-color-error};
+  --color-success: #{$dark-color-success};
+  --color-warning: #{$dark-color-warning};
+  --color-info: #{$dark-color-info};
+  
+  // Text colors
+  --color-text-primary: #{map-get($dark-color-text, primary)};
+  --color-text-secondary: #{map-get($dark-color-text, secondary)};
+  --color-text-disabled: #{map-get($dark-color-text, disabled)};
+  --color-text-inverse: #{map-get($dark-color-text, inverse)};
+  
+  // Border colors
+  --color-border: #{$dark-color-border};
+  --color-divider: #{$dark-color-divider};
+  
+  // Elevation shadows
+  --shadow-surface: #{map-get($dark-elevation-shadows, surface)};
+  --shadow-card: #{map-get($dark-elevation-shadows, card)};
+  --shadow-dialog: #{map-get($dark-elevation-shadows, dialog)};
+  --shadow-modal: #{map-get($dark-elevation-shadows, modal)};
+  
+  // Interactive states
+  --color-overlay: #{$dark-color-overlay};
+  --focus-ring: #{$dark-focus-ring};
+  
+  // Spacing (inherited from base variables)
+  --spacing-unit: #{$spacing-base};
+}
+
+// Export dark theme variables for use in other components
+:export {
+  darkColorBackground: $dark-color-background;
+  darkColorSurface: $dark-color-surface;
+  darkColorSurfaceElevated: $dark-color-surface-elevated;
+  darkColorText: $dark-color-text;
+  darkElevationShadows: $dark-elevation-shadows;
+  darkColorOverlay: $dark-color-overlay;
+  darkFocusRing: $dark-focus-ring;
+}
