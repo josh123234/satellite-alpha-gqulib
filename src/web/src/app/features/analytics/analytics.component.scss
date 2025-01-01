@@ -1,0 +1,129 @@
+// Import design system abstracts
+@use 'styles/abstracts/variables' as *;
+@use 'styles/abstracts/mixins' as *;
+@use 'styles/components/cards' as *;
+
+// Main analytics container with responsive grid layout
+.analytics-container {
+  display: grid;
+  gap: map-get($spacing-values, 3);
+  padding: map-get($spacing-values, 3);
+  width: 100%;
+  max-width: map-get($breakpoints, 'desktop');
+  margin: 0 auto;
+  will-change: transform;
+  transition: all 0.3s ease-in-out;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: map-get($spacing-values, 2);
+    padding: map-get($spacing-values, 2);
+  }
+
+  @include tablet {
+    grid-template-columns: repeat(2, 1fr);
+    gap: map-get($spacing-values, 3);
+  }
+
+  @include desktop {
+    grid-template-columns: repeat(3, 1fr);
+    gap: map-get($spacing-values, 4);
+  }
+}
+
+// Cost analysis section with enhanced card styling
+.cost-analysis {
+  grid-column: 1 / -1;
+  @extend .card;
+  padding: map-get($spacing-values, 4);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: map-get($spacing-values, 3);
+
+  @include mobile {
+    padding: map-get($spacing-values, 2);
+    min-height: 250px;
+    gap: map-get($spacing-values, 2);
+  }
+
+  @include elevation('card');
+}
+
+// Department breakdown section with responsive height
+.department-breakdown {
+  @extend .card;
+  min-height: 400px;
+  padding: map-get($spacing-values, 3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @include mobile {
+    min-height: 300px;
+    padding: map-get($spacing-values, 2);
+  }
+
+  @include elevation('card');
+}
+
+// Usage trends section with optimized chart container
+.usage-trends {
+  @extend .card;
+  min-height: 400px;
+  padding: map-get($spacing-values, 3);
+  display: flex;
+  flex-direction: column;
+  gap: map-get($spacing-values, 2);
+
+  @include mobile {
+    min-height: 300px;
+    padding: map-get($spacing-values, 2);
+  }
+
+  @include elevation('card');
+}
+
+// Enhanced container for chart components
+.chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+  will-change: transform;
+  transition: height 0.3s ease-in-out;
+}
+
+// Interactive states for cards
+.cost-analysis,
+.department-breakdown,
+.usage-trends {
+  &:hover {
+    @extend .card--interactive;
+  }
+
+  // Focus states for accessibility
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// Print styles optimization
+@media print {
+  .analytics-container {
+    display: block;
+    padding: 0;
+  }
+
+  .cost-analysis,
+  .department-breakdown,
+  .usage-trends {
+    page-break-inside: avoid;
+    margin-bottom: map-get($spacing-values, 4);
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}
