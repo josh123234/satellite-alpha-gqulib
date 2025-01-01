@@ -1,0 +1,171 @@
+// =============================================================================
+// Typography Base Styles
+// Implements core typography system with performance and accessibility features
+// =============================================================================
+
+// Import design system abstracts
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// Import font families
+// @fontsource/inter v5.0.0
+@import '@fontsource/inter/400.css';  // Regular
+@import '@fontsource/inter/500.css';  // Medium
+@import '@fontsource/inter/700.css';  // Bold
+
+// @fontsource/source-code-pro v5.0.0
+@import '@fontsource/source-code-pro/400.css';
+@import '@fontsource/source-code-pro/700.css';
+
+// Base HTML Typography
+// -----------------------------------------------------------------------------
+html {
+  font-family: $font-family-primary;
+  font-size: $font-size-base;
+  font-display: swap; // Optimize font loading performance
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  // Support system font size preferences
+  @media screen and (prefers-reduced-motion: no-preference) {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  font-size: 1rem;
+  line-height: map-get($line-heights, body);
+  text-size-adjust: 100%;
+  font-kerning: normal;
+  font-feature-settings: "kern", "liga", "clig", "calt";
+}
+
+// Selection styling
+::selection {
+  background-color: rgba($color-primary, 0.2);
+  text-shadow: none;
+}
+
+// Heading Typography
+// -----------------------------------------------------------------------------
+h1, h2, h3, h4, h5, .heading {
+  font-family: $font-family-primary;
+  font-weight: map-get($font-weights, bold);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: $color-primary;
+  text-wrap: balance;
+  
+  // Improve accessibility
+  &:focus {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// Responsive heading sizes
+h1, .h1 {
+  font-size: clamp(28px, 5vw, map-get($font-sizes, h1));
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+
+h2, .h2 {
+  font-size: clamp(24px, 4vw, map-get($font-sizes, h2));
+  letter-spacing: -0.01em;
+}
+
+h3, .h3 {
+  font-size: clamp(20px, 3vw, map-get($font-sizes, h3));
+}
+
+h4, .h4 {
+  font-size: clamp(18px, 2.5vw, map-get($font-sizes, h4));
+}
+
+h5, .h5 {
+  font-size: map-get($font-sizes, h5);
+}
+
+// Body Typography
+// -----------------------------------------------------------------------------
+.text-body {
+  font-size: map-get($font-sizes, body);
+  line-height: map-get($line-heights, body);
+  color: $color-primary;
+  max-width: 75ch; // Optimal reading length
+  word-wrap: break-word;
+  hyphens: auto;
+  
+  // Support high contrast mode
+  @media screen and (prefers-contrast: more) {
+    color: #000;
+    background-color: #fff;
+  }
+}
+
+.text-small {
+  font-size: map-get($font-sizes, small);
+  line-height: map-get($line-heights, body);
+}
+
+// Monospace Typography
+// -----------------------------------------------------------------------------
+code, pre, .text-mono {
+  font-family: $font-family-mono;
+  font-size: 0.9375em; // 15px when base is 16px
+  line-height: 1.6;
+  font-feature-settings: "calt" 1, "ss02" 1;
+}
+
+// Utility Classes
+// -----------------------------------------------------------------------------
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.font-regular {
+  font-weight: map-get($font-weights, regular);
+}
+
+.font-medium {
+  font-weight: map-get($font-weights, medium);
+}
+
+.font-bold {
+  font-weight: map-get($font-weights, bold);
+}
+
+// Responsive Typography Helpers
+// -----------------------------------------------------------------------------
+@include mobile {
+  html {
+    font-size: 15px; // Slightly smaller base for mobile
+  }
+}
+
+@include tablet {
+  html {
+    font-size: 16px;
+  }
+}
+
+@include desktop {
+  html {
+    font-size: 16px;
+  }
+}
+
+// Export typography classes
+:export {
+  headings: '.heading, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5';
+  text-body: '.text-body';
+  text-truncate: '.text-truncate';
+}
