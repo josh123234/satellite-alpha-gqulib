@@ -1,0 +1,190 @@
+// =============================================================================
+// Dashboard Component Styles
+// Enterprise-grade styles for the main dashboard component with responsive grid,
+// modern CSS features, and comprehensive design system integration
+// =============================================================================
+
+// Import design system abstracts
+@use 'src/web/src/styles/abstracts/variables' as *;
+@use 'src/web/src/styles/abstracts/mixins' as *;
+@use 'src/web/src/styles/layout/grid' as *;
+
+// Container Styles
+// -----------------------------------------------------------------------------
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  padding: map-get($spacing-values, 3);
+  min-height: 100vh;
+  
+  // Enable container queries for enhanced responsive behavior
+  @supports (container-type: inline-size) {
+    container-type: inline-size;
+    container-name: dashboard;
+  }
+}
+
+// Header Section
+// -----------------------------------------------------------------------------
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: map-get($spacing-values, 3);
+  
+  @include mobile {
+    flex-direction: column;
+    gap: map-get($spacing-values, 2);
+  }
+}
+
+// Widget Grid
+// -----------------------------------------------------------------------------
+.widget-grid {
+  display: grid;
+  gap: map-get($spacing-values, 3);
+  contain: layout style;
+  
+  // Container query-based responsive layout
+  @container dashboard (min-width: 0) {
+    grid-template-columns: 1fr;
+  }
+  
+  @container dashboard (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @container dashboard (min-width: 1024px) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  }
+  
+  // Fallback for browsers without container query support
+  @supports not (container-type: inline-size) {
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+    
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include desktop {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+  }
+}
+
+// Widget Card
+// -----------------------------------------------------------------------------
+.widget-card {
+  background: var(--surface-color, white);
+  border-radius: 8px;
+  padding: map-get($spacing-values, 3);
+  contain: content;
+  
+  // Apply elevation and transitions
+  @include elevation('card');
+  transition: 
+    transform var(--transition-duration-fast, 150ms) var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow var(--transition-duration-fast, 150ms) var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1));
+  will-change: transform, box-shadow;
+  
+  // Interactive states
+  &:hover {
+    @include elevation('dialog');
+    transform: translateY(-2px);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+  
+  // Respect reduced motion preferences
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// Widget Header
+// -----------------------------------------------------------------------------
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: map-get($spacing-values, 2);
+  
+  h3 {
+    margin: 0;
+    font-size: map-get($font-sizes, h3);
+    font-weight: map-get($font-weights, bold);
+  }
+}
+
+// Widget Content
+// -----------------------------------------------------------------------------
+.widget-content {
+  position: relative;
+  min-height: 200px;
+  
+  // Loading state
+  &--loading {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(2px);
+    }
+  }
+}
+
+// Widget Actions
+// -----------------------------------------------------------------------------
+.widget-actions {
+  display: flex;
+  gap: map-get($spacing-values, 2);
+  margin-top: map-get($spacing-values, 3);
+  justify-content: flex-end;
+  
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+// Empty State
+// -----------------------------------------------------------------------------
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: map-get($spacing-values, 4);
+  min-height: 300px;
+  
+  @include mobile {
+    min-height: 200px;
+  }
+}
+
+// Print Styles
+// -----------------------------------------------------------------------------
+@media print {
+  .dashboard {
+    padding: 0;
+  }
+  
+  .widget-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .widget-actions {
+    display: none;
+  }
+}
