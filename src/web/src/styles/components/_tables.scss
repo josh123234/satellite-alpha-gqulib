@@ -1,0 +1,288 @@
+// =============================================================================
+// Table Component Styles
+// Core SCSS styles for data tables with enhanced accessibility, performance
+// optimizations, and responsive behaviors
+// =============================================================================
+
+@use 'abstracts/variables' as *;
+@use 'abstracts/mixins' as *;
+
+// Base Table Container
+// -----------------------------------------------------------------------------
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: $font-family-primary;
+  contain: content; // Optimize rendering performance
+  position: relative;
+  min-height: 200px;
+  
+  // Enable smooth scrolling for virtual scroll
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+// Table Header
+// -----------------------------------------------------------------------------
+.table-header {
+  background-color: rgba($color-primary, 0.05);
+  font-weight: map-get($font-weights, 'medium');
+  position: sticky;
+  top: 0;
+  z-index: map-get($z-index-levels, 'sticky');
+
+  th {
+    padding: $spacing-base * 2;
+    text-align: left;
+    white-space: nowrap;
+    user-select: none; // Prevent text selection in headers
+    
+    // Sort indicator container
+    &.sortable {
+      cursor: pointer;
+      padding-right: $spacing-base * 4;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: $spacing-base;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-size: contain;
+        opacity: 0.5;
+        transition: transform $transition-duration-normal $transition-timing;
+      }
+
+      &.sorted-asc::after {
+        transform: translateY(-50%) rotate(180deg);
+        opacity: 1;
+      }
+
+      &.sorted-desc::after {
+        opacity: 1;
+      }
+
+      // Keyboard focus styles
+      &:focus {
+        outline: 2px solid $color-primary;
+        outline-offset: -2px;
+      }
+    }
+  }
+}
+
+// Table Body
+// -----------------------------------------------------------------------------
+.table-body {
+  position: relative;
+
+  // Virtual scroll container
+  &.virtual-scroll {
+    height: 400px;
+    overflow-y: auto;
+    contain: strict;
+  }
+}
+
+// Table Row
+// -----------------------------------------------------------------------------
+.table-row {
+  border-bottom: 1px solid rgba($color-primary, 0.1);
+  transition: background-color $transition-duration-fast $transition-timing;
+
+  &:hover {
+    background-color: rgba($color-primary, 0.02);
+  }
+
+  &:focus-within {
+    outline: 2px solid $color-primary;
+    outline-offset: -2px;
+  }
+
+  // Alternate row colors for better readability
+  &:nth-child(even) {
+    background-color: rgba($color-primary, 0.01);
+  }
+}
+
+// Table Cell
+// -----------------------------------------------------------------------------
+.table-cell {
+  padding: $spacing-base * 2;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px; // Prevent cells from becoming too wide
+
+  // Status indicator styles
+  &.status {
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: $spacing-base;
+    }
+
+    &.active::before {
+      background-color: $color-success;
+    }
+
+    &.inactive::before {
+      background-color: $color-warning;
+    }
+
+    &.error::before {
+      background-color: $color-error;
+    }
+  }
+}
+
+// Responsive Table Behaviors
+// -----------------------------------------------------------------------------
+@mixin responsive-table {
+  @include mobile {
+    // Stack rows on mobile
+    .table-header {
+      display: none; // Hide headers on mobile
+    }
+
+    .table-row {
+      display: block;
+      padding: $spacing-base * 2;
+      margin-bottom: $spacing-base * 2;
+      border: 1px solid rgba($color-primary, 0.1);
+      border-radius: 4px;
+
+      td {
+        display: block;
+        padding: $spacing-base;
+        text-align: right;
+        border: none;
+
+        &::before {
+          content: attr(data-label);
+          float: left;
+          font-weight: map-get($font-weights, 'medium');
+          text-transform: uppercase;
+          font-size: map-get($font-sizes, 'small');
+        }
+      }
+    }
+  }
+
+  @include tablet {
+    // Horizontal scroll on tablet
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    .table-row {
+      white-space: nowrap;
+    }
+  }
+
+  @include desktop {
+    // Full layout on desktop
+    overflow: visible;
+    
+    .table-row {
+      white-space: normal;
+    }
+  }
+}
+
+// Sortable Header Functionality
+// -----------------------------------------------------------------------------
+@mixin sortable-header {
+  .table-header th.sortable {
+    &:hover {
+      background-color: rgba($color-primary, 0.1);
+    }
+
+    // Keyboard navigation
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: -2px;
+    }
+
+    // Sort animation
+    &.sorting::after {
+      animation: spin 1s infinite linear;
+    }
+  }
+}
+
+// Loading State
+// -----------------------------------------------------------------------------
+.table-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: map-get($z-index-levels, 'modal');
+}
+
+// Empty State
+// -----------------------------------------------------------------------------
+.table-empty {
+  padding: $spacing-base * 4;
+  text-align: center;
+  color: rgba($color-primary, 0.5);
+}
+
+// Error State
+// -----------------------------------------------------------------------------
+.table-error {
+  padding: $spacing-base * 4;
+  text-align: center;
+  color: $color-error;
+}
+
+// Animations
+// -----------------------------------------------------------------------------
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Apply Responsive Behavior
+// -----------------------------------------------------------------------------
+.table {
+  @include responsive-table;
+  @include sortable-header;
+}
+
+// RTL Support
+// -----------------------------------------------------------------------------
+[dir="rtl"] {
+  .table {
+    th, td {
+      text-align: right;
+    }
+
+    .table-header th.sortable {
+      padding-right: $spacing-base * 2;
+      padding-left: $spacing-base * 4;
+
+      &::after {
+        right: auto;
+        left: $spacing-base;
+      }
+    }
+  }
+}
