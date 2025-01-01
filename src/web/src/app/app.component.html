@@ -1,0 +1,126 @@
+<!-- Main application container with responsive layout and accessibility attributes -->
+<div class="app-container" role="application" aria-label="SaaS Management Platform" 
+     [ngClass]="{'disconnected': !(wsConnected$ | async), 'sidebar-collapsed': sidebarCollapsed}">
+  
+  <!-- Top Navigation Bar -->
+  <header class="top-nav" role="banner">
+    <div class="nav-left">
+      <button class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Toggle navigation menu">
+        <i class="fas fa-bars"></i>
+      </button>
+      <img src="assets/logo.svg" alt="SaaS Management Platform Logo" class="logo">
+    </div>
+
+    <div class="nav-right">
+      <div class="search-bar">
+        <input type="search" placeholder="Search..." aria-label="Search">
+        <i class="fas fa-search"></i>
+      </div>
+
+      <!-- Notification Center -->
+      <div class="notification-center" *ngIf="notifications$ | async as notifications">
+        <button class="notification-trigger" [attr.aria-label]="'Notifications (' + notifications.length + ' unread)'"
+                [ngClass]="{'has-alerts': notifications.length > 0}">
+          <i class="fas fa-bell"></i>
+          <span class="badge" *ngIf="notifications.length > 0">{{notifications.length}}</span>
+        </button>
+      </div>
+
+      <!-- User Menu -->
+      <div class="user-menu" *ngIf="currentUser$ | async as user">
+        <button class="user-trigger" [attr.aria-label]="'User menu for ' + user.firstName">
+          <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.firstName + '\'s avatar'" class="avatar">
+          <span class="user-name">{{user.firstName}}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area with Sidebar -->
+  <div class="content-wrapper">
+    <!-- Navigation Sidebar -->
+    <nav class="sidebar" role="navigation" [ngClass]="{'collapsed': sidebarCollapsed}">
+      <ul class="nav-items">
+        <li>
+          <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">
+            <i class="fas fa-home"></i>
+            <span class="nav-label">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/subscriptions" routerLinkActive="active" aria-label="Subscriptions">
+            <i class="fas fa-cube"></i>
+            <span class="nav-label">Subscriptions</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/analytics" routerLinkActive="active" aria-label="Analytics">
+            <i class="fas fa-chart-line"></i>
+            <span class="nav-label">Analytics</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/ai-assistant" routerLinkActive="active" aria-label="AI Assistant">
+            <i class="fas fa-robot"></i>
+            <span class="nav-label">AI Assistant</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/settings" routerLinkActive="active" aria-label="Settings">
+            <i class="fas fa-cog"></i>
+            <span class="nav-label">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content" role="main" aria-live="polite">
+      <!-- Connection Status Banner -->
+      <div class="connection-banner" *ngIf="!(wsConnected$ | async)" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Connection lost. Attempting to reconnect...</span>
+      </div>
+
+      <!-- Dynamic Content Router Outlet -->
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- Notification Overlay -->
+  <div class="notification-container" *ngIf="notifications$ | async as notifications" role="alert" aria-live="assertive">
+    <div class="notification-item" *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+         [ngClass]="notification.priority.toLowerCase()"
+         [@notificationAnimation]>
+      <div class="notification-header">
+        <span class="notification-type">{{notification.type}}</span>
+        <button class="close-btn" (click)="dismissNotification(notification.id)" aria-label="Dismiss notification">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="notification-content">
+        <h3>{{notification.title}}</h3>
+        <p>{{notification.message}}</p>
+      </div>
+      <div class="notification-actions" *ngIf="notification.metadata?.actionRequired">
+        <button class="action-btn" (click)="handleNotificationAction(notification)">
+          Take Action
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Assistant Overlay -->
+  <div class="ai-assistant-overlay" *ngIf="showAiAssistant" [@assistantAnimation]>
+    <div class="assistant-header">
+      <h2>AI Assistant</h2>
+      <button class="close-btn" (click)="toggleAiAssistant()" aria-label="Close AI Assistant">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="assistant-content">
+      <!-- AI Assistant content will be dynamically loaded -->
+      <router-outlet name="assistant"></router-outlet>
+    </div>
+  </div>
+</div>
