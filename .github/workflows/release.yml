@@ -1,0 +1,257 @@
+name: Release Workflow
+
+on:
+  workflow_run:
+    workflows: ['Backend CI', 'Frontend CI', 'Infrastructure CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (semver)'
+        required: true
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+      force_deploy:
+        description: 'Force deployment without staging'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  DEPLOY_TIMEOUT: 45m
+  HEALTH_CHECK_RETRIES: 5
+
+concurrency:
+  group: production_deploy
+  cancel-in-progress: false
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.create_tag.outputs.tag }}
+      artifacts_validated: ${{ steps.validate_artifacts.outputs.validated }}
+      security_passed: ${{ steps.security_check.outputs.passed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify workflow dependencies
+        run: |
+          for workflow in "Backend CI" "Frontend CI" "Infrastructure CI"; do
+            status=$(gh api repos/${{ github.repository }}/actions/workflows/$workflow/runs/latest | jq -r .conclusion)
+            if [ "$status" != "success" ]; then
+              echo "Workflow $workflow did not complete successfully"
+              exit 1
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Validate artifacts
+        id: validate_artifacts
+        run: |
+          # Verify backend artifacts
+          if [ ! -f "artifacts/backend/container.tar" ]; then
+            echo "Backend container artifact missing"
+            exit 1
+          fi
+
+          # Verify frontend artifacts
+          if [ ! -f "artifacts/frontend/container.tar" ]; then
+            echo "Frontend container artifact missing"
+            exit 1
+          fi
+
+          # Verify infrastructure plan
+          if [ ! -f "artifacts/prod-plan/prod-plan.tfplan" ]; then
+            echo "Infrastructure plan missing"
+            exit 1
+          fi
+
+          echo "validated=true" >> $GITHUB_OUTPUT
+
+      - name: Security check
+        id: security_check
+        run: |
+          # Check security scan results
+          if [ -f "artifacts/security-report/high-vulnerabilities.txt" ]; then
+            echo "High security vulnerabilities detected"
+            exit 1
+          fi
+          echo "passed=true" >> $GITHUB_OUTPUT
+
+      - name: Create release tag
+        id: create_tag
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          git tag -a "v${VERSION}" -m "Release ${VERSION}"
+          git push origin "v${VERSION}"
+          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+
+  deploy-staging:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    environment: staging
+    if: ${{ !github.event.inputs.force_deploy }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Deploy to staging
+        timeout-minutes: 45
+        run: |
+          # Deploy infrastructure changes
+          terraform init
+          terraform workspace select staging
+          terraform apply -auto-approve
+
+          # Deploy services
+          aws ecs update-service --cluster staging --service backend --force-new-deployment
+          aws ecs update-service --cluster staging --service frontend --force-new-deployment
+
+          # Wait for services to stabilize
+          aws ecs wait services-stable \
+            --cluster staging \
+            --services backend frontend
+
+      - name: Run health checks
+        run: |
+          attempts=0
+          while [ $attempts -lt ${{ env.HEALTH_CHECK_RETRIES }} ]; do
+            if curl -f https://staging-api.example.com/health && \
+               curl -f https://staging.example.com/health; then
+              echo "Health checks passed"
+              exit 0
+            fi
+            attempts=$((attempts + 1))
+            sleep 30
+          done
+          echo "Health checks failed"
+          exit 1
+
+  deploy-production:
+    needs: [prepare-release, deploy-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency: production_deploy
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Initialize blue environment
+        run: |
+          # Create new blue environment
+          aws ecs create-service \
+            --cluster production \
+            --service-name backend-blue \
+            --task-definition backend:${GITHUB_SHA}
+
+          aws ecs create-service \
+            --cluster production \
+            --service-name frontend-blue \
+            --task-definition frontend:${GITHUB_SHA}
+
+      - name: Deploy and migrate database
+        run: |
+          # Run database migrations
+          aws ecs run-task \
+            --cluster production \
+            --task-definition migrations:${GITHUB_SHA} \
+            --network-configuration "awsvpcConfiguration={subnets=[],securityGroups=[]}"
+
+      - name: Health checks
+        run: |
+          attempts=0
+          while [ $attempts -lt ${{ env.HEALTH_CHECK_RETRIES }} ]; do
+            if curl -f https://blue-api.example.com/health && \
+               curl -f https://blue.example.com/health; then
+              echo "Blue environment healthy"
+              exit 0
+            fi
+            attempts=$((attempts + 1))
+            sleep 30
+          done
+          echo "Blue environment health checks failed"
+          exit 1
+
+      - name: Traffic shift
+        run: |
+          # Gradually shift traffic to blue environment
+          for weight in 10 25 50 75 100; do
+            aws elasticloadbalancingv2 modify-listener \
+              --listener-arn ${{ secrets.PROD_LISTENER_ARN }} \
+              --default-actions '[{"Type":"forward","ForwardConfig":{"TargetGroups":[{"TargetGroupArn":"'${BLUE_TG_ARN}'","Weight":'${weight}'},{"TargetGroupArn":"'${GREEN_TG_ARN}'","Weight":'$((100-weight))'}]}}]'
+            
+            sleep 60
+            
+            # Monitor error rates
+            if ! aws cloudwatch get-metric-statistics \
+              --namespace AWS/ApplicationELB \
+              --metric-name HTTPCode_Target_5XX_Count \
+              --period 60 \
+              --statistics Sum \
+              --threshold 10; then
+              echo "Error rate too high, rolling back"
+              exit 1
+            fi
+          done
+
+      - name: Finalize deployment
+        run: |
+          # Update DNS
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} \
+            --change-batch file://dns-update.json
+
+          # Cleanup old green environment
+          aws ecs delete-service \
+            --cluster production \
+            --service backend-green \
+            --force
+
+          aws ecs delete-service \
+            --cluster production \
+            --service frontend-green \
+            --force
+
+      - name: Notify deployment completion
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
