@@ -1,0 +1,107 @@
+// Import core design system abstracts
+@use 'styles/abstracts/variables' as *;
+@use 'styles/abstracts/mixins' as *;
+@use 'styles/layout/grid' as *;
+
+// Host element styles
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+// Main application container
+.app-container {
+  display: grid;
+  grid-template-columns: [full-start] 1fr [content-start] minmax(0, 1200px) [content-end] 1fr [full-end];
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  background-color: var(--app-background);
+  
+  // Ensure smooth transitions
+  @include reduced-motion {
+    transition: none;
+  }
+}
+
+// Main content area
+.main-content {
+  grid-column: content-start / content-end;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: map-get($spacing-values, 4);
+  padding: map-get($spacing-values, 3);
+  position: relative;
+  z-index: 1;
+  
+  // Mobile layout adjustments
+  @include mobile {
+    grid-template-columns: 1fr;
+    padding: map-get($spacing-values, 2);
+  }
+}
+
+// Side panel
+.side-panel {
+  width: 360px;
+  background: var(--surface-background);
+  @include elevation(card);
+  transition: transform 0.3s map-get($transition-timing, 'ease-out');
+  will-change: transform;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  
+  // Custom scrollbar styling
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+  
+  // Mobile styles
+  @include mobile {
+    width: 100%;
+    height: 80vh;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: map-get($z-index-levels, 'modal');
+    border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+    
+    &.visible {
+      transform: translateY(0);
+    }
+  }
+  
+  // Tablet styles
+  @include tablet {
+    width: 320px;
+    height: 100%;
+    position: relative;
+    transform: none;
+    border-radius: 8px;
+  }
+  
+  // Desktop styles
+  @include desktop {
+    width: 360px;
+  }
+}
+
+// Print styles
+@media print {
+  .side-panel {
+    display: none;
+  }
+  
+  .main-content {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+}
