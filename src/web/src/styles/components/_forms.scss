@@ -1,0 +1,191 @@
+// =============================================================================
+// Form Component Styles
+// Core SCSS styles for form components implementing the design system's form elements
+// with enhanced accessibility and responsive features
+// =============================================================================
+
+// Import design system abstracts
+@use 'abstracts/variables' as *;
+@use 'abstracts/mixins' as *;
+
+// Form Variables
+// -----------------------------------------------------------------------------
+$input-height: 48px;
+$input-padding: $spacing-base * 2;
+$input-border-radius: 4px;
+$input-border-width: 1px;
+$label-margin-bottom: $spacing-base;
+$form-grid-gap: $spacing-base * 2;
+$form-transition: all 0.2s ease-in-out;
+$form-focus-ring-width: 3px;
+$form-focus-ring-color: rgba($color-primary, 0.25);
+
+// Form Group
+// -----------------------------------------------------------------------------
+.form-group {
+  margin-bottom: $spacing-base * 3;
+  display: grid;
+  gap: $form-grid-gap;
+  grid-template-columns: repeat(12, 1fr);
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: $spacing-base;
+  }
+
+  @include tablet {
+    grid-template-columns: repeat(6, 1fr);
+    gap: $spacing-base * 1.5;
+  }
+}
+
+// Form Label
+// -----------------------------------------------------------------------------
+.form-label {
+  display: block;
+  margin-bottom: $label-margin-bottom;
+  font-weight: map-get($font-weights, 'medium');
+  color: rgba($color-primary, 0.9);
+  cursor: pointer;
+  
+  // Required field indicator
+  &[data-required="true"]::after {
+    content: "*";
+    color: $color-error;
+    margin-left: $spacing-base * 0.5;
+  }
+
+  // Disabled state
+  &[data-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Form Control
+// -----------------------------------------------------------------------------
+.form-control {
+  width: 100%;
+  height: $input-height;
+  padding: $input-padding;
+  border-radius: $input-border-radius;
+  border: $input-border-width solid rgba($color-primary, 0.2);
+  font-family: $font-family-primary;
+  font-size: map-get($font-sizes, 'body');
+  transition: $form-transition;
+  background-color: white;
+
+  // Focus state with enhanced accessibility
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 $form-focus-ring-width $form-focus-ring-color;
+    border-color: $color-primary;
+  }
+
+  // Invalid state
+  &[aria-invalid="true"] {
+    border-color: $color-error;
+    padding-right: calc($input-padding * 2);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23EF4444'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right $input-padding center;
+    background-size: 24px;
+  }
+
+  // Disabled state
+  &:disabled {
+    background-color: rgba($color-primary, 0.05);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  // Placeholder styling
+  &::placeholder {
+    color: rgba($color-primary, 0.4);
+  }
+
+  // Reduced motion preference
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+// Form Error
+// -----------------------------------------------------------------------------
+.form-error {
+  color: $color-error;
+  font-size: map-get($font-sizes, 'small');
+  margin-top: $spacing-base;
+  display: flex;
+  align-items: center;
+  gap: $spacing-base;
+
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23EF4444'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+    background-size: contain;
+  }
+}
+
+// Form Validation State Mixin
+// -----------------------------------------------------------------------------
+@mixin form-validation-state($state, $color) {
+  .form-control {
+    &.is-#{$state} {
+      border-color: $color;
+      
+      &:focus-visible {
+        box-shadow: 0 0 0 $form-focus-ring-width rgba($color, 0.25);
+      }
+    }
+  }
+
+  .form-#{$state}-feedback {
+    color: $color;
+    font-size: map-get($font-sizes, 'small');
+    margin-top: $spacing-base;
+  }
+}
+
+// Form Control Focus Mixin
+// -----------------------------------------------------------------------------
+@mixin form-control-focus {
+  &:focus-visible {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 $form-focus-ring-width $form-focus-ring-color;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+// Form Field Group Mixin
+// -----------------------------------------------------------------------------
+@mixin form-field-group($layout: 'horizontal', $columns: 2) {
+  display: grid;
+  gap: $form-grid-gap;
+
+  @if $layout == 'horizontal' {
+    grid-template-columns: repeat($columns, 1fr);
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  } @else {
+    grid-template-columns: 1fr;
+  }
+
+  &[dir="rtl"] {
+    direction: rtl;
+  }
+}
+
+// Apply validation states
+@include form-validation-state('valid', $color-success);
+@include form-validation-state('invalid', $color-error);
+@include form-validation-state('warning', $color-warning);
