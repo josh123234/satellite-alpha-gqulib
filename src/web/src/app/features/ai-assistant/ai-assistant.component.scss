@@ -1,0 +1,175 @@
+// Import design system abstracts
+@use 'styles/abstracts/variables' as *;
+@use 'styles/abstracts/mixins' as *;
+@use 'styles/components/cards' as *;
+
+// Main container
+.ai-assistant {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: map-get($spacing-values, 3);
+  background-color: var(--surface-background);
+  transition: padding 0.2s $transition-timing;
+
+  @include mobile {
+    padding: map-get($spacing-values, 2);
+    height: calc(100vh - 56px);
+    max-height: -webkit-fill-available;
+  }
+}
+
+// Chat message container
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: map-get($spacing-values, 3);
+  scroll-behavior: smooth;
+  padding-right: map-get($spacing-values, 2);
+  
+  // Fade effect for scrollable content
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 20px,
+    black calc(100% - 20px),
+    transparent
+  );
+  
+  // Hide scrollbar on mobile
+  @include mobile {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    scrollbar-width: none;
+  }
+}
+
+// Base message styles
+.message {
+  margin-bottom: map-get($spacing-values, 2);
+  padding: map-get($spacing-values, 2);
+  border-radius: 8px;
+  max-width: 80%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  word-break: break-word;
+  min-height: 44px; // Ensure touch target size
+  @include elevation('card');
+
+  @include mobile {
+    max-width: 90%;
+    padding: map-get($spacing-values, 1);
+  }
+}
+
+// User message variant
+.message--user {
+  background-color: rgba($color-primary, 0.1);
+  margin-left: auto;
+  color: var(--text-primary);
+  transform-origin: right bottom;
+
+  &.sending {
+    opacity: 0.7;
+  }
+}
+
+// Assistant message variant
+.message--assistant {
+  background-color: #ffffff;
+  margin-right: auto;
+  transform-origin: left bottom;
+
+  &.loading {
+    opacity: 0.7;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+// Input container
+.input-container {
+  display: flex;
+  gap: map-get($spacing-values, 2);
+  padding: map-get($spacing-values, 2);
+  background-color: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  @include elevation('surface');
+
+  @include mobile {
+    padding: map-get($spacing-values, 1);
+    gap: map-get($spacing-values, 1);
+  }
+}
+
+// Insight card styles
+.insight-card {
+  @extend .card;
+  @extend .card--interactive;
+  margin-bottom: map-get($spacing-values, 2);
+  min-height: 64px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @include focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  @include mobile {
+    min-height: 56px;
+    padding: map-get($spacing-values, 2);
+  }
+}
+
+// Loading animation
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+// Accessibility enhancements
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+// Print styles
+@media print {
+  .ai-assistant {
+    height: auto;
+    overflow: visible;
+  }
+
+  .input-container {
+    display: none;
+  }
+
+  .message {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
