@@ -1,0 +1,158 @@
+// =============================================================================
+// Design System Mixins
+// Core SCSS mixins implementing the design system's responsive behavior,
+// typography, elevation, and other reusable styling patterns
+// =============================================================================
+
+// Import design system variables
+@use 'abstracts/variables' as *;
+
+// Utility Functions
+// -----------------------------------------------------------------------------
+
+/// Removes the unit from a number
+/// @param {Number} $value - Number with unit to strip
+/// @return {Number} - Number without unit
+/// @throw Error if value is not a number
+@function strip-unit($value) {
+  @if type-of($value) != 'number' {
+    @error 'Value passed to strip-unit() must be a number, received: #{type-of($value)}.';
+  }
+  @return $value / ($value * 0 + 1);
+}
+
+// Responsive Breakpoint Mixins
+// -----------------------------------------------------------------------------
+
+/// Mobile-first breakpoint mixin (<640px)
+/// @content styles to be included
+@mixin mobile {
+  @if not map-has-key($breakpoints, 'mobile') {
+    @error 'Mobile breakpoint not found in $breakpoints map.';
+  }
+  
+  @media screen and (max-width: map-get($breakpoints, 'mobile')) {
+    @content;
+  }
+}
+
+/// Tablet breakpoint mixin (641px-1024px)
+/// @content styles to be included
+@mixin tablet {
+  @if not map-has-key($breakpoints, 'tablet') {
+    @error 'Tablet breakpoint not found in $breakpoints map.';
+  }
+  
+  @media screen and (min-width: map-get($breakpoints, 'mobile') + 1) and (max-width: map-get($breakpoints, 'tablet')) {
+    @content;
+  }
+}
+
+/// Desktop breakpoint mixin (1025px-1440px)
+/// @content styles to be included
+@mixin desktop {
+  @if not map-has-key($breakpoints, 'desktop') {
+    @error 'Desktop breakpoint not found in $breakpoints map.';
+  }
+  
+  @media screen and (min-width: map-get($breakpoints, 'tablet') + 1) and (max-width: map-get($breakpoints, 'desktop')) {
+    @content;
+  }
+}
+
+/// Large screen breakpoint mixin (>1440px)
+/// @content styles to be included
+@mixin large {
+  @if not map-has-key($breakpoints, 'desktop') {
+    @error 'Desktop breakpoint not found in $breakpoints map.';
+  }
+  
+  @media screen and (min-width: map-get($breakpoints, 'desktop') + 1) {
+    @content;
+  }
+}
+
+// Elevation Mixins
+// -----------------------------------------------------------------------------
+
+/// Applies consistent box shadow elevation
+/// @param {String} $level - Elevation level (surface, card, dialog, modal)
+@mixin elevation($level) {
+  @if not map-has-key($elevation-levels, $level) {
+    @error 'Invalid elevation level: #{$level}. Must be one of: #{map-keys($elevation-levels)}.';
+  }
+  
+  $elevation: map-get($elevation-levels, $level);
+  
+  @if $elevation == 0 {
+    box-shadow: none;
+  } @else {
+    box-shadow: 0 #{$elevation}px #{$elevation * 2}px rgba(0, 0, 0, 0.1);
+  }
+  
+  // Fallback for older browsers
+  @supports not (box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)) {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Typography Mixins
+// -----------------------------------------------------------------------------
+
+/// Applies heading typography styles
+/// @param {String} $level - Heading level (h1-h5)
+@mixin heading($level) {
+  @if not map-has-key($font-sizes, $level) {
+    @error 'Invalid heading level: #{$level}. Must be one of: h1, h2, h3, h4, h5.';
+  }
+  
+  font-family: $font-family-primary;
+  font-weight: map-get($font-weights, 'bold');
+  font-size: map-get($font-sizes, $level);
+  line-height: 1.2;
+  margin: 0;
+  
+  // Responsive scaling
+  @include mobile {
+    font-size: map-get($font-sizes, $level) * 0.85;
+  }
+  
+  @include tablet {
+    font-size: map-get($font-sizes, $level) * 0.9;
+  }
+}
+
+/// Applies body text typography styles
+/// @param {String} $size - Text size (body, small)
+@mixin body-text($size: 'body') {
+  @if not map-has-key($font-sizes, $size) {
+    @error 'Invalid text size: #{$size}. Must be one of: body, small.';
+  }
+  
+  font-family: $font-family-primary;
+  font-weight: map-get($font-weights, 'regular');
+  font-size: map-get($font-sizes, $size);
+  line-height: 1.5;
+  
+  // Responsive scaling for mobile
+  @include mobile {
+    font-size: map-get($font-sizes, $size) * 0.9;
+  }
+}
+
+// Export all mixins for use in other files
+@forward 'responsive-mixins' {
+  @use 'mobile';
+  @use 'tablet';
+  @use 'desktop';
+  @use 'large';
+}
+
+@forward 'elevation-mixins' {
+  @use 'elevation';
+}
+
+@forward 'typography-mixins' {
+  @use 'heading';
+  @use 'body-text';
+}
