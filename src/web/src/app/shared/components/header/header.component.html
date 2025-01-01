@@ -1,0 +1,117 @@
+<header class="header header--fixed" role="banner">
+  <!-- Logo Section -->
+  <div class="header__section header__logo">
+    <a routerLink="/" class="header__logo-link" aria-label="SaaS Management Platform Home">
+      <img src="assets/images/logo.svg" alt="SaaS Management Platform" width="32" height="32" />
+      <span class="header__logo-text">SaaS Management Platform</span>
+    </a>
+  </div>
+
+  <!-- Search Section -->
+  <div class="header__section header__search">
+    <div class="search-container" role="search">
+      <input
+        type="search"
+        class="search-input"
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearch($event)"
+        (keydown.escape)="clearSearch()"
+        placeholder="Search subscriptions..."
+        aria-label="Search subscriptions"
+        [attr.aria-expanded]="showSearchResults"
+        role="searchbox"
+      />
+      <app-button
+        variant="text"
+        size="md"
+        [ariaLabel]="'Clear search'"
+        (clicked)="clearSearch()"
+        *ngIf="searchText"
+      >
+        <i class="icon icon-close" aria-hidden="true"></i>
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Actions Section -->
+  <div class="header__section header__actions">
+    <!-- Notifications -->
+    <div class="header__notifications">
+      <app-button
+        variant="text"
+        size="md"
+        [ariaLabel]="'View notifications'"
+        (clicked)="toggleNotifications()"
+        [attr.aria-expanded]="showNotifications"
+        [attr.aria-controls]="'notification-panel'"
+      >
+        <i class="icon icon-bell" aria-hidden="true"></i>
+        <span class="notification-badge" *ngIf="unreadNotificationsCount > 0" aria-label="{{unreadNotificationsCount}} unread notifications">
+          {{unreadNotificationsCount}}
+        </span>
+      </app-button>
+
+      <!-- Notification Panel -->
+      <div 
+        id="notification-panel"
+        class="notification-panel"
+        *ngIf="showNotifications"
+        role="region"
+        aria-label="Notifications"
+        appClickOutside
+        (clickOutside)="closeNotifications()"
+      >
+        <div class="notification-header">
+          <h2 class="notification-title">Notifications</h2>
+          <app-button
+            variant="text"
+            size="sm"
+            [ariaLabel]="'Mark all as read'"
+            (clicked)="markAllNotificationsAsRead()"
+            *ngIf="hasUnreadNotifications"
+          >
+            Mark all as read
+          </app-button>
+        </div>
+
+        <div class="notification-list" role="list">
+          <app-notification
+            *ngFor="let notification of notifications"
+            [notification]="notification"
+            [priority]="notification.priority"
+            (dismiss)="onNotificationDismiss($event)"
+            role="listitem"
+          ></app-notification>
+
+          <div class="notification-empty" *ngIf="!notifications.length" role="status">
+            No notifications to display
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Menu -->
+    <div class="header__user-menu">
+      <app-dropdown
+        [options]="userMenuOptions"
+        (selectionChange)="onUserMenuSelect($event)"
+        [position]="'bottom-right'"
+        [ariaLabel]="'User menu'"
+        class="user-menu-dropdown"
+      >
+        <div class="user-menu-trigger" slot="trigger">
+          <div class="user-avatar">
+            <img 
+              [src]="userAvatarUrl || 'assets/images/default-avatar.svg'"
+              [alt]="userName"
+              width="32"
+              height="32"
+            />
+          </div>
+          <span class="user-name" *ngIf="!isMobileView">{{userName}}</span>
+          <i class="icon icon-chevron-down" aria-hidden="true"></i>
+        </div>
+      </app-dropdown>
+    </div>
+  </div>
+</header>
