@@ -1,0 +1,173 @@
+// =============================================================================
+// Angular Material Theme Customization
+// Implements the SaaS Management Platform's design system through Material theming
+// Version: @angular/material ^17.0.0
+// =============================================================================
+
+@use '@angular/material' as mat;
+@use '../abstracts/variables' as *;
+
+// Include core Material styles
+@include mat.core();
+
+// Typography Configuration
+// -----------------------------------------------------------------------------
+$custom-typography: mat.define-typography-config(
+  $font-family: $font-family-primary,
+  $headline-1: mat.define-typography-level(32px, 40px, 700),
+  $headline-2: mat.define-typography-level(24px, 32px, 700),
+  $headline-3: mat.define-typography-level(20px, 28px, 600),
+  $headline-4: mat.define-typography-level(18px, 24px, 600),
+  $body-1: mat.define-typography-level(16px, 24px, 400),
+  $body-2: mat.define-typography-level(14px, 20px, 400),
+  $button: mat.define-typography-level(14px, 20px, 500),
+  $caption: mat.define-typography-level(12px, 16px, 400)
+);
+
+// Color Palettes
+// -----------------------------------------------------------------------------
+// Define custom palettes based on design system colors
+$custom-primary-palette: (
+  50: lighten($color-primary, 40%),
+  100: lighten($color-primary, 30%),
+  200: lighten($color-primary, 20%),
+  300: lighten($color-primary, 10%),
+  400: lighten($color-primary, 5%),
+  500: $color-primary,
+  600: darken($color-primary, 5%),
+  700: darken($color-primary, 10%),
+  800: darken($color-primary, 20%),
+  900: darken($color-primary, 30%),
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white
+  )
+);
+
+$custom-secondary-palette: (
+  50: lighten($color-secondary, 40%),
+  100: lighten($color-secondary, 30%),
+  200: lighten($color-secondary, 20%),
+  300: lighten($color-secondary, 10%),
+  400: lighten($color-secondary, 5%),
+  500: $color-secondary,
+  600: darken($color-secondary, 5%),
+  700: darken($color-secondary, 10%),
+  800: darken($color-secondary, 20%),
+  900: darken($color-secondary, 30%),
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white
+  )
+);
+
+$custom-accent-palette: (
+  50: lighten($color-accent, 40%),
+  100: lighten($color-accent, 30%),
+  200: lighten($color-accent, 20%),
+  300: lighten($color-accent, 10%),
+  400: lighten($color-accent, 5%),
+  500: $color-accent,
+  600: darken($color-accent, 5%),
+  700: darken($color-accent, 10%),
+  800: darken($color-accent, 20%),
+  900: darken($color-accent, 30%),
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white
+  )
+);
+
+// Create theme object
+$custom-theme: mat.define-light-theme((
+  color: (
+    primary: mat.define-palette($custom-primary-palette),
+    accent: mat.define-palette($custom-accent-palette),
+    warn: mat.define-palette(mat.$red-palette)
+  ),
+  typography: $custom-typography,
+  density: 0
+));
+
+// Component-specific customizations
+// -----------------------------------------------------------------------------
+@mixin custom-component-themes($theme) {
+  $color-config: mat.get-color-config($theme);
+  $primary: map-get($color-config, 'primary');
+  $accent: map-get($color-config, 'accent');
+  
+  // Button customization
+  .mat-mdc-button, .mat-mdc-raised-button {
+    border-radius: $spacing-base * 0.5;
+    min-height: $spacing-base * 5;
+  }
+
+  // Card customization
+  .mat-mdc-card {
+    border-radius: $spacing-base;
+    @include mat.elevation(map-get($elevation-levels, card));
+  }
+
+  // Dialog customization
+  .mat-mdc-dialog-container {
+    border-radius: $spacing-base;
+    @include mat.elevation(map-get($elevation-levels, dialog));
+  }
+
+  // Form field customization
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-wrapper {
+      margin-bottom: $spacing-base;
+    }
+  }
+
+  // Table customization
+  .mat-mdc-table {
+    .mat-mdc-header-cell {
+      font-weight: map-get($font-weights, medium);
+    }
+  }
+}
+
+// Apply theme
+// -----------------------------------------------------------------------------
+@include mat.all-component-themes($custom-theme);
+@include custom-component-themes($custom-theme);
+
+// Accessibility enhancements
+// -----------------------------------------------------------------------------
+@include mat.strong-focus-indicators();
+
+// High contrast mode support
+@media (forced-colors: active) {
+  .mat-mdc-button, 
+  .mat-mdc-raised-button,
+  .mat-mdc-card,
+  .mat-mdc-dialog-container {
+    border: 1px solid currentColor;
+  }
+}
