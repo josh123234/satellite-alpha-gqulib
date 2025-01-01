@@ -1,0 +1,211 @@
+<!-- Main dashboard container with theme and accessibility support -->
+<main class="dashboard-container" role="main" aria-label="Dashboard" [attr.data-theme]="theme">
+  <!-- Subscription Overview Section -->
+  <section class="dashboard-section overview" aria-labelledby="overview-title">
+    <h2 id="overview-title" class="sr-only">Subscription Overview</h2>
+    <app-subscription-overview
+      [subscriptions]="subscriptions"
+      [totalSpend]="totalSpend"
+      [activeSubscriptions]="activeSubscriptions"
+      [loading]="loading.subscriptions"
+      [error]="errors.subscriptions">
+      <ng-template #subscriptionLoadingTpl>
+        <div class="loading-skeleton" aria-busy="true">
+          <div class="skeleton-item"></div>
+          <div class="skeleton-item"></div>
+        </div>
+      </ng-template>
+      <ng-template #subscriptionErrorTpl>
+        <div class="error-state" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <p>Unable to load subscription data. Please try again.</p>
+          <button mat-button (click)="refreshData()">Retry</button>
+        </div>
+      </ng-template>
+    </app-subscription-overview>
+  </section>
+
+  <!-- Cost Summary Section -->
+  <section class="dashboard-section costs" aria-labelledby="costs-title">
+    <h2 id="costs-title" class="sr-only">Cost Summary</h2>
+    <app-cost-summary
+      [totalSpend]="totalSpend"
+      [spendChange]="spendChange"
+      [loading]="loading.costs"
+      [error]="errors.costs">
+      <ng-template #costLoadingTpl>
+        <div class="loading-skeleton" aria-busy="true">
+          <div class="skeleton-item"></div>
+          <div class="skeleton-item"></div>
+        </div>
+      </ng-template>
+      <ng-template #costErrorTpl>
+        <div class="error-state" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <p>Unable to load cost data. Please try again.</p>
+          <button mat-button (click)="refreshData()">Retry</button>
+        </div>
+      </ng-template>
+    </app-cost-summary>
+  </section>
+
+  <!-- License Usage Section -->
+  <section class="dashboard-section licenses" aria-labelledby="licenses-title">
+    <h2 id="licenses-title" class="sr-only">License Usage</h2>
+    <app-license-usage
+      [subscriptions]="subscriptions"
+      [loading]="loading.licenses"
+      [error]="errors.licenses">
+      <ng-template #licenseLoadingTpl>
+        <div class="loading-skeleton" aria-busy="true">
+          <div class="skeleton-item"></div>
+          <div class="skeleton-item"></div>
+        </div>
+      </ng-template>
+      <ng-template #licenseErrorTpl>
+        <div class="error-state" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <p>Unable to load license data. Please try again.</p>
+          <button mat-button (click)="refreshData()">Retry</button>
+        </div>
+      </ng-template>
+    </app-license-usage>
+  </section>
+
+  <!-- Recent Activity Section -->
+  <section class="dashboard-section activity" aria-labelledby="activity-title">
+    <h2 id="activity-title" class="sr-only">Recent Activity</h2>
+    <app-recent-activity
+      [activities]="recentActivities"
+      [maxActivities]="5"
+      [loading]="loading.activities"
+      [error]="errors.activities">
+      <ng-template #activityLoadingTpl>
+        <div class="loading-skeleton" aria-busy="true">
+          <div class="skeleton-item"></div>
+          <div class="skeleton-item"></div>
+        </div>
+      </ng-template>
+      <ng-template #activityErrorTpl>
+        <div class="error-state" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <p>Unable to load recent activities. Please try again.</p>
+          <button mat-button (click)="refreshData()">Retry</button>
+        </div>
+      </ng-template>
+    </app-recent-activity>
+  </section>
+</main>
+
+<!-- Responsive Grid Layout Styles -->
+<style>
+  .dashboard-container {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--text);
+  }
+
+  /* Desktop Layout (3 columns) */
+  @media (min-width: 1024px) {
+    .dashboard-container {
+      grid-template-areas:
+        "overview overview activity"
+        "costs licenses activity";
+      grid-template-columns: 1fr 1fr 300px;
+    }
+  }
+
+  /* Tablet Layout (2 columns) */
+  @media (min-width: 641px) and (max-width: 1023px) {
+    .dashboard-container {
+      grid-template-areas:
+        "overview overview"
+        "costs licenses"
+        "activity activity";
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Mobile Layout (single column) */
+  @media (max-width: 640px) {
+    .dashboard-container {
+      grid-template-areas:
+        "overview"
+        "costs"
+        "licenses"
+        "activity";
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Section Styles */
+  .dashboard-section {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+  }
+
+  .overview { grid-area: overview; }
+  .costs { grid-area: costs; }
+  .licenses { grid-area: licenses; }
+  .activity { grid-area: activity; }
+
+  /* Loading Skeleton Styles */
+  .loading-skeleton {
+    animation: pulse 1.5s infinite;
+  }
+
+  .skeleton-item {
+    height: 24px;
+    background: var(--skeleton);
+    margin: 8px 0;
+    border-radius: 4px;
+  }
+
+  /* Error State Styles */
+  .error-state {
+    text-align: center;
+    padding: 1rem;
+    color: var(--error);
+  }
+
+  /* Screen Reader Only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  /* Theme Support */
+  [data-theme="light"] {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --text: #1f2937;
+    --skeleton: #e5e7eb;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] {
+    --background: #1f2937;
+    --surface: #374151;
+    --text: #f9fafb;
+    --skeleton: #4b5563;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.6; }
+  }
+</style>
