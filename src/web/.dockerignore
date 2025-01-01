@@ -1,0 +1,78 @@
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.angular
+coverage
+
+# Version control
+.git
+.gitignore
+
+# Development files
+*.spec.ts
+e2e
+test.ts
+jest.config.js
+karma.conf.js
+tsconfig.spec.json
+
+# IDE and editor files
+.vscode
+.idea
+.editorconfig
+*.swp
+*.swo
+
+# Environment and secrets
+.env*
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.cert
+
+# Logs and debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs
+
+# Test reports and coverage
+coverage
+.nyc_output
+reports
+
+# Temporary files
+tmp
+temp
+.tmp
+*.tmp
+
+# Package manager files
+.npm
+.yarn
+.yarnrc
+.pnp.*
+
+# Exceptions - files required for build
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.app.json
+!angular.json
+!src/**/*
+!projects/**/*
