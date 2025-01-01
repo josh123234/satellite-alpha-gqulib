@@ -1,0 +1,183 @@
+# Prometheus Configuration v2.45.0
+# This configuration file defines the complete monitoring setup for the SaaS Management Platform
+# including metrics collection, alerting rules, and storage settings.
+
+global:
+  scrape_interval: 15s     # Default interval for scraping targets
+  evaluation_interval: 15s # Default interval for evaluating rules
+  scrape_timeout: 10s     # Timeout for scrape requests
+  external_labels:        # Labels added to any time series or alerts
+    environment: production
+    region: us-east-1
+    monitor: prometheus-primary
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+          labels:
+            severity: critical
+      scheme: http
+      timeout: 5s
+      api_version: v2
+
+# Rule files specifying alerting and recording rules
+rule_files:
+  - "rules/node_alerts.yml"
+  - "rules/service_alerts.yml"
+  - "rules/api_alerts.yml"
+  - "rules/security_alerts.yml"
+
+# Scrape configurations containing endpoints to scrape
+scrape_configs:
+  # Self-monitoring
+  - job_name: prometheus
+    honor_labels: true
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: prometheus
+          environment: production
+
+  # API Services monitoring
+  - job_name: api_services
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scheme: http
+    static_configs:
+      - targets: 
+        - 'api-gateway:9091'
+        - 'subscription-service:9092'
+        - 'analytics-service:9093'
+        - 'ai-service:9094'
+        labels:
+          environment: production
+          service_type: api
+          team: backend
+
+  # Database monitoring
+  - job_name: databases
+    metrics_path: /metrics
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+        - 'postgres-exporter:9187'
+        - 'redis-exporter:9121'
+        - 'mongodb-exporter:9216'
+        labels:
+          environment: production
+          service_type: database
+          team: infrastructure
+
+  # Security metrics monitoring
+  - job_name: security_metrics
+    metrics_path: /metrics
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - 'auth-service:9095'
+        - 'waf-metrics:9096'
+        - 'audit-service:9097'
+        labels:
+          environment: production
+          service_type: security
+          team: security
+
+  # Infrastructure monitoring
+  - job_name: node_metrics
+    metrics_path: /metrics
+    scrape_interval: 20s
+    static_configs:
+      - targets:
+        - 'node-exporter:9100'
+        labels:
+          environment: production
+          service_type: infrastructure
+          team: infrastructure
+
+  # Container metrics
+  - job_name: container_metrics
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+        - 'cadvisor:8080'
+        labels:
+          environment: production
+          service_type: container
+          team: infrastructure
+
+  # Load Balancer metrics
+  - job_name: load_balancer
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+        - 'alb-exporter:9094'
+        labels:
+          environment: production
+          service_type: network
+          team: infrastructure
+
+  # Cache monitoring
+  - job_name: cache_metrics
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+        - 'redis-exporter:9121'
+        labels:
+          environment: production
+          service_type: cache
+          team: infrastructure
+
+  # Business metrics
+  - job_name: business_metrics
+    metrics_path: /metrics
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+        - 'subscription-metrics:9095'
+        - 'usage-metrics:9096'
+        labels:
+          environment: production
+          service_type: business
+          team: product
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus
+    retention:
+      time: 30d
+      size: 100GB
+    wal:
+      retention:
+        time: 12h
+
+# Remote write configuration for long-term storage
+remote_write:
+  - url: "http://thanos-receive:19291/api/v1/receive"
+    remote_timeout: 30s
+    queue_config:
+      capacity: 10000
+      max_shards: 200
+      max_samples_per_send: 500
+      batch_send_deadline: 5s
+      min_backoff: 30ms
+      max_backoff: 100ms
+
+# TLS configuration
+tls_config:
+  cert_file: /etc/prometheus/certs/prometheus.crt
+  key_file: /etc/prometheus/certs/prometheus.key
+  min_version: TLS12
+
+# Security settings
+web:
+  tls_config:
+    cert_file: /etc/prometheus/certs/web.crt
+    key_file: /etc/prometheus/certs/web.key
+  http_server_timeout: 30s
+  max_connections: 512
