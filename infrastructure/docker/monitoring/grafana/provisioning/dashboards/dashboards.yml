@@ -1,0 +1,50 @@
+# Grafana Dashboard Provisioning Configuration v9.5.0
+# Configures automated dashboard loading and management for the SaaS Management Platform
+
+apiVersion: 1
+
+providers:
+  - name: 'SaaS Platform Dashboards'
+    type: 'file'
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      # Path where dashboard JSON files are stored
+      path: /etc/grafana/provisioning/dashboards
+      # Enable automatic folder creation based on file structure
+      foldersFromFilesStructure: true
+
+    # Dashboard search configuration
+    disableDeletion: true
+    editable: false
+    
+    # Dashboard organization settings
+    orgId: 1
+    
+    # Dashboard file patterns to load
+    options:
+      # API monitoring dashboard
+      - name: 'API Monitoring'
+        path: '../dashboards/api.json'
+        type: file
+      
+      # Cost analytics dashboard  
+      - name: 'Cost Analytics'
+        path: '../dashboards/costs.json'
+        type: file
+      
+      # System infrastructure dashboard
+      - name: 'System Infrastructure'
+        path: '../dashboards/system.json'
+        type: file
+
+    # Security settings
+    options:
+      # Prevent manual dashboard updates through UI
+      allowUiUpdates: false
+      
+      # Enable folder organization based on file structure
+      foldersFromFilesStructure: true
+      
+      # Dashboard search paths
+      path: /etc/grafana/provisioning/dashboards
