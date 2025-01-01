@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>SaaS Management Platform</title>
+  
+  <!-- Responsive viewport configuration -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+  
+  <!-- Primary meta tags -->
+  <meta name="description" content="SaaS Management Platform for discovering, tracking, and optimizing software subscriptions across your organization">
+  <meta name="application-name" content="SaaS Management Platform">
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Theme colors for different color schemes -->
+  <meta name="theme-color" content="#2563EB" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1E40AF" media="(prefers-color-scheme: dark)">
+  
+  <!-- iOS specific meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- Resource hints for performance optimization -->
+  <link rel="preconnect" href="https://api.saasmanagement.com" crossorigin>
+  <link rel="dns-prefetch" href="https://api.saasmanagement.com">
+  
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/inter/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="assets/fonts/inter/Inter-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="assets/fonts/inter/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  
+  <!-- Defer non-critical font -->
+  <link rel="preload" href="assets/fonts/source-code-pro/SourceCodePro-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low">
+  
+  <!-- Security headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https:; connect-src 'self' https://api.saasmanagement.com">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <!-- Base href for Angular routing -->
+  <base href="/">
+</head>
+<body>
+  <!-- Main application root with ARIA landmarks -->
+  <app-root>
+    <!-- Loading state -->
+    <div role="status" 
+         aria-label="Loading application" 
+         style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+      <div style="color: #2563EB; font-family: system-ui, -apple-system, sans-serif;">
+        Loading SaaS Management Platform...
+      </div>
+    </div>
+  </app-root>
+  
+  <!-- Fallback for JavaScript disabled browsers -->
+  <noscript>
+    <div style="padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+      Please enable JavaScript to use the SaaS Management Platform.
+    </div>
+  </noscript>
+</body>
+</html>
