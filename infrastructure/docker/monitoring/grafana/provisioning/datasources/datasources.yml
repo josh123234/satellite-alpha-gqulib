@@ -1,0 +1,44 @@
+# Grafana Datasources Configuration v9.5.0
+# Automatically provisions monitoring data sources on startup
+
+apiVersion: 1
+
+# List of data sources to delete before provisioning new ones
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+# List of data sources to provision
+datasources:
+  # Prometheus metrics data source
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    version: 1
+    editable: false
+    jsonData:
+      timeInterval: 15s
+      queryTimeout: 30s
+      httpMethod: POST
+
+  # AWS CloudWatch data source for infrastructure metrics
+  - name: CloudWatch
+    type: cloudwatch
+    access: proxy
+    jsonData:
+      authType: default
+      defaultRegion: us-east-1
+    version: 1
+    editable: false
+
+  # AWS X-Ray data source for distributed tracing
+  - name: X-Ray
+    type: grafana-x-ray-datasource
+    access: proxy
+    jsonData:
+      authType: default
+      defaultRegion: us-east-1
+    version: 1
+    editable: false
