@@ -1,0 +1,194 @@
+// =============================================================================
+// Main Stylesheet Entry Point
+// SaaS Management Platform - Global Styles and Design System Implementation
+// Version: @angular/material ^17.0.0, normalize.css ^8.0.1
+// =============================================================================
+
+// Import external dependencies
+@use '@angular/material/theming' as mat;
+@import 'normalize.css';
+
+// Import internal abstracts and functions
+@use 'abstracts/functions' as *;
+@use 'abstracts/variables' as *;
+
+// Import vendor customizations
+@use 'vendors/angular-material' as material;
+
+// Critical CSS Generation
+// -----------------------------------------------------------------------------
+@mixin critical-styles {
+  html {
+    font-size: 16px;
+    font-family: $font-family-primary;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--background);
+  }
+
+  :root {
+    color-scheme: light dark;
+    
+    // Theme Variables
+    --primary: #{$color-primary};
+    --secondary: #{$color-secondary};
+    --accent: #{$color-accent};
+    --error: #{$color-error};
+    --success: #{$color-success};
+    --warning: #{$color-warning};
+    --info: #{$color-info};
+
+    // Light Theme Defaults
+    --background: #ffffff;
+    --surface: #f8fafc;
+    --text-primary: rgba(0, 0, 0, 0.87);
+    --text-secondary: rgba(0, 0, 0, 0.6);
+    --border: rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Dark Theme
+// -----------------------------------------------------------------------------
+@mixin dark-theme {
+  :root[data-theme="dark"] {
+    --background: #121212;
+    --surface: #1e1e1e;
+    --text-primary: rgba(255, 255, 255, 0.87);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.12);
+  }
+}
+
+// Responsive Breakpoints
+// -----------------------------------------------------------------------------
+@mixin responsive-styles {
+  @media screen and (max-width: map-get($breakpoints, mobile)) {
+    html {
+      font-size: 14px;
+    }
+  }
+
+  @media screen and (min-width: map-get($breakpoints, mobile)) and (max-width: map-get($breakpoints, tablet)) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  @media screen and (min-width: map-get($breakpoints, desktop)) {
+    html {
+      font-size: 16px;
+    }
+  }
+}
+
+// Utility Classes
+// -----------------------------------------------------------------------------
+.elevation {
+  @each $level, $value in $elevation-levels {
+    &-#{$level} {
+      box-shadow: elevation($level);
+    }
+  }
+}
+
+.spacing {
+  @each $key, $value in $spacing-values {
+    &-#{$key} {
+      margin: spacing($value);
+      padding: spacing($value);
+    }
+  }
+}
+
+.text {
+  @each $size, $value in $font-sizes {
+    &-#{$size} {
+      font-size: rem($value);
+    }
+  }
+
+  @each $weight, $value in $font-weights {
+    &-#{$weight} {
+      font-weight: $value;
+    }
+  }
+}
+
+// Layout Utilities
+.flex {
+  display: flex;
+  
+  &-column {
+    flex-direction: column;
+  }
+  
+  &-center {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-gap: $grid-gutter;
+}
+
+// Visibility Utilities
+.hide {
+  &-mobile {
+    @media screen and (max-width: map-get($breakpoints, mobile)) {
+      display: none !important;
+    }
+  }
+
+  &-tablet {
+    @media screen and (min-width: map-get($breakpoints, mobile)) and (max-width: map-get($breakpoints, tablet)) {
+      display: none !important;
+    }
+  }
+
+  &-desktop {
+    @media screen and (min-width: map-get($breakpoints, desktop)) {
+      display: none !important;
+    }
+  }
+}
+
+// Print Styles
+// -----------------------------------------------------------------------------
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+}
+
+// Apply all styles
+// -----------------------------------------------------------------------------
+@include critical-styles;
+@include dark-theme;
+@include responsive-styles;
+
+// Export theme variables for component usage
+:export {
+  primaryColor: $color-primary;
+  secondaryColor: $color-secondary;
+  accentColor: $color-accent;
+  fontPrimary: $font-family-primary;
+  fontMono: $font-family-mono;
+  spacingBase: $spacing-base;
+}
