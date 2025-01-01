@@ -1,0 +1,70 @@
+# Order is important - the last matching pattern takes precedence.
+
+# Global owners (fallback for any files not matched by other rules)
+* @project-leads
+
+# Backend microservices ownership
+src/backend/** @backend-team @security-team
+
+# AI/ML components requiring specialized review
+src/backend/src/ai/** @ai-team @backend-team @security-team
+
+# Frontend application ownership
+src/web/** @frontend-team @security-team
+
+# Core frontend modules with enhanced security review
+src/web/src/app/core/** @frontend-team @security-team
+
+# Infrastructure configurations
+infrastructure/** @devops-team @security-team
+
+# CI/CD workflow configurations
+.github/workflows/** @devops-team @security-team
+
+# Authentication components with primary security team ownership
+src/backend/src/auth/** @security-team @backend-team
+
+# Backend configuration requiring multi-team review
+src/backend/src/config/** @backend-team @devops-team @security-team
+
+# Database migrations requiring specialized database team review
+src/backend/src/database/migrations/** @backend-team @database-team @security-team
+
+# Documentation ownership
+docs/** @project-leads @backend-team @frontend-team
+
+# Security-related documentation
+docs/security/** @security-team @project-leads
+
+# Test configurations and frameworks
+tests/** @backend-team @frontend-team @security-team
+
+# Package dependencies and lock files
+package.json @backend-team @devops-team
+package-lock.json @backend-team @devops-team
+yarn.lock @frontend-team @devops-team
+
+# Environment configurations
+.env.example @devops-team @security-team
+*.env.* @devops-team @security-team
+
+# Docker configurations
+Dockerfile* @devops-team @security-team
+docker-compose*.yml @devops-team @security-team
+
+# Kubernetes configurations
+k8s/** @devops-team @security-team
+
+# Database schema and configuration
+src/backend/src/database/schema/** @database-team @backend-team
+src/backend/src/database/config/** @database-team @backend-team @security-team
+
+# API specifications
+src/backend/src/api/** @backend-team @security-team
+
+# Shared utilities and common code
+src/shared/** @backend-team @frontend-team @security-team
+
+# Build configurations
+*.config.js @devops-team @backend-team @frontend-team
+*.config.ts @devops-team @backend-team @frontend-team
