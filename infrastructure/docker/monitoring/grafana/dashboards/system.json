@@ -1,0 +1,319 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "system-infrastructure",
+    "title": "System Infrastructure",
+    "tags": ["system", "infrastructure", "monitoring", "containers", "performance"],
+    "timezone": "browser",
+    "refresh": "1m",
+    "schemaVersion": 36,
+    "version": 1,
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "editable": true,
+    "panels": [
+      {
+        "id": 1,
+        "title": "CPU Usage by Container",
+        "type": "graph",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[5m])) by (container)",
+            "legendFormat": "{{container}}",
+            "interval": "30s",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "CPU Usage",
+            "show": true,
+            "min": 0,
+            "max": 1
+          }
+        ],
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "legend": {
+          "show": true,
+          "values": true,
+          "min": true,
+          "max": true,
+          "current": true,
+          "total": false,
+          "avg": true
+        }
+      },
+      {
+        "id": 2,
+        "title": "Memory Usage by Container",
+        "type": "graph",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "sum(container_memory_usage_bytes{container!=\"\"}) by (container)",
+            "legendFormat": "{{container}}",
+            "interval": "30s",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "bytes",
+            "label": "Memory Usage",
+            "show": true,
+            "min": 0
+          }
+        ],
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "legend": {
+          "show": true,
+          "values": true,
+          "min": true,
+          "max": true,
+          "current": true,
+          "total": false,
+          "avg": true
+        }
+      },
+      {
+        "id": 3,
+        "title": "Network Traffic by Container",
+        "type": "graph",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_network_receive_bytes_total[5m])) by (container)",
+            "legendFormat": "{{container}} Received",
+            "interval": "30s",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(container_network_transmit_bytes_total[5m])) by (container)",
+            "legendFormat": "{{container}} Transmitted",
+            "interval": "30s",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "Bps",
+            "label": "Network Traffic",
+            "show": true,
+            "min": 0
+          }
+        ],
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "legend": {
+          "show": true,
+          "values": true,
+          "min": true,
+          "max": true,
+          "current": true,
+          "total": false,
+          "avg": true
+        }
+      },
+      {
+        "id": 4,
+        "title": "Disk I/O by Container",
+        "type": "graph",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(container_fs_reads_bytes_total[5m])) by (container)",
+            "legendFormat": "{{container}} Reads",
+            "interval": "30s",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(container_fs_writes_bytes_total[5m])) by (container)",
+            "legendFormat": "{{container}} Writes",
+            "interval": "30s",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "Bps",
+            "label": "Disk I/O",
+            "show": true,
+            "min": 0
+          }
+        ],
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "legend": {
+          "show": true,
+          "values": true,
+          "min": true,
+          "max": true,
+          "current": true,
+          "total": false,
+          "avg": true
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "container",
+          "type": "query",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "query": "label_values(container_cpu_usage_seconds_total, container)",
+          "refresh": 2,
+          "multi": true,
+          "includeAll": true,
+          "sort": 1,
+          "label": "Container"
+        },
+        {
+          "name": "node",
+          "type": "query",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "query": "label_values(node_uname_info, nodename)",
+          "refresh": 2,
+          "multi": true,
+          "includeAll": true,
+          "sort": 1,
+          "label": "Node"
+        }
+      ]
+    },
+    "alerting": {
+      "alertmanager": {
+        "uid": "alertmanager"
+      },
+      "rules": [
+        {
+          "name": "High CPU Usage",
+          "conditions": [
+            {
+              "evaluator": {
+                "type": "gt",
+                "params": [80]
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "type": "avg",
+                "params": []
+              }
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "notifications": [
+            {
+              "uid": "slack-notification",
+              "name": "Slack Alert Channel"
+            },
+            {
+              "uid": "email-notification",
+              "name": "Email Alert"
+            }
+          ],
+          "message": "Container CPU usage is above 80% for 5 minutes",
+          "executionErrorState": "alerting",
+          "noDataState": "no_data",
+          "for": "5m"
+        },
+        {
+          "name": "Memory Usage Critical",
+          "conditions": [
+            {
+              "evaluator": {
+                "type": "gt",
+                "params": [90]
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "type": "avg",
+                "params": []
+              }
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "notifications": [
+            {
+              "uid": "slack-notification",
+              "name": "Slack Alert Channel"
+            },
+            {
+              "uid": "email-notification",
+              "name": "Email Alert"
+            }
+          ],
+          "message": "Container memory usage is above 90% for 5 minutes",
+          "executionErrorState": "alerting",
+          "noDataState": "no_data",
+          "for": "5m"
+        }
+      ]
+    }
+  }
+}
