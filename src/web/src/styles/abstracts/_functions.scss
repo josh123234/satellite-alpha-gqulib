@@ -1,0 +1,110 @@
+// =============================================================================
+// Design System Functions
+// Core SCSS utility functions for the SaaS Management Platform's design system
+// =============================================================================
+
+@use "sass:math";
+@use "sass:map";
+@use "sass:color";
+@use "sass:string";
+@import "./variables";
+
+// Typography
+// -----------------------------------------------------------------------------
+
+/// Converts pixel values to rem units for consistent typography scaling
+/// @param {Number} $pixel-value - The pixel value to convert
+/// @return {String} The converted rem value
+/// @throw {Error} If pixel value is not a positive number
+@function rem($pixel-value) {
+  @if (type-of($pixel-value) != "number" or $pixel-value <= 0) {
+    @error "rem() expects a positive number, got #{$pixel-value}";
+  }
+  
+  @return math.div($pixel-value, $font-size-base) + rem;
+}
+
+// Spacing
+// -----------------------------------------------------------------------------
+
+/// Calculates spacing values based on the 8px grid system
+/// @param {Number} $multiplier - The spacing multiplier
+/// @return {String} The calculated spacing value in pixels
+/// @throw {Error} If multiplier is not a positive number
+@function spacing($multiplier) {
+  @if (type-of($multiplier) != "number" or $multiplier < 0) {
+    @error "spacing() expects a non-negative number, got #{$multiplier}";
+  }
+  
+  $calculated-value: $spacing-base * $multiplier;
+  @return #{$calculated-value}px;
+}
+
+// Elevation
+// -----------------------------------------------------------------------------
+
+/// Generates box-shadow values for different elevation levels
+/// @param {String} $level - The elevation level name
+/// @return {String} The box-shadow value with vendor prefixes
+/// @throw {Error} If level is not defined in elevation-levels map
+@function elevation($level) {
+  @if not map.has-key($elevation-levels, $level) {
+    @error "elevation() level '#{$level}' not found in $elevation-levels map";
+  }
+  
+  $depth: map.get($elevation-levels, $level);
+  $shadow-color: rgba(0, 0, 0, 0.1);
+  
+  @if $depth == 0 {
+    @return none;
+  }
+  
+  $y-offset: #{$depth}px;
+  $blur: #{$depth * 4}px;
+  $spread: #{math.div($depth, -2)}px;
+  
+  // Return box-shadow with ambient and direct shadows
+  @return 0 #{$y-offset} #{$blur} #{$spread} #{$shadow-color},
+          0 #{math.div($depth, 2)}px #{math.div($blur, 2)} rgba(0, 0, 0, 0.06);
+}
+
+// Color
+// -----------------------------------------------------------------------------
+
+/// Adjusts color opacity while maintaining color values
+/// @param {String} $color - The color value (hex, rgb, or rgba)
+/// @param {Number} $opacity - The desired opacity value (0-1)
+/// @return {String} The RGBA color value
+/// @throw {Error} If color format is invalid or opacity is out of range
+@function color-opacity($color, $opacity) {
+  @if (type-of($opacity) != "number" or $opacity < 0 or $opacity > 1) {
+    @error "color-opacity() opacity must be between 0 and 1, got #{$opacity}";
+  }
+  
+  // Handle hex colors
+  @if string.slice($color, 1, 1) == "#" {
+    $color: color.rgb($color);
+  }
+  
+  // Handle existing rgba colors
+  @if string.index(#{$color}, "rgba") {
+    $color: color.rgb($color);
+  }
+  
+  @return rgba($color, $opacity);
+}
+
+// Z-Index
+// -----------------------------------------------------------------------------
+
+/// Retrieves z-index values from z-index map
+/// @param {String} $layer - The layer name
+/// @return {Number} The z-index value
+/// @throw {Error} If layer is not defined in z-index-levels map
+@function z($layer) {
+  @if not map.has-key($z-index-levels, $layer) {
+    @error "z() layer '#{$layer}' not found in $z-index-levels map";
+  }
+  
+  @return map.get($z-index-levels, $layer);
+}
