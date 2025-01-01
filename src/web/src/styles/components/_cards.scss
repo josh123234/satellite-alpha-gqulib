@@ -1,0 +1,90 @@
+// =============================================================================
+// Card Component Styles
+// Provides consistent container styling with configurable variants, elevation 
+// levels, and responsive behavior for the SaaS Management Platform
+// =============================================================================
+
+// Import required design system abstracts
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// Base Card Component
+// -----------------------------------------------------------------------------
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: map-get($spacing-values, 3);
+  margin-bottom: map-get($spacing-values, 2);
+  transition: 
+    transform 0.2s map-get($transition-timing, 'ease-out'),
+    box-shadow 0.2s map-get($transition-timing, 'ease-out');
+  
+  // Apply base card elevation
+  @include elevation('card');
+  
+  // Apply responsive styles
+  @include responsive-card;
+}
+
+// Interactive Card Variant
+// -----------------------------------------------------------------------------
+.card--interactive {
+  cursor: pointer;
+  outline: none;
+  position: relative;
+
+  // Enhanced elevation and transform on hover/focus
+  &:hover,
+  &:focus {
+    transform: translateY(-2px);
+    @include elevation('dialog');
+  }
+
+  // Accessible focus outline
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// Compact Card Variant
+// -----------------------------------------------------------------------------
+.card--compact {
+  padding: map-get($spacing-values, 2);
+
+  @include mobile {
+    padding: map-get($spacing-values, 1);
+  }
+}
+
+// Expanded Card Variant
+// -----------------------------------------------------------------------------
+.card--expanded {
+  padding: map-get($spacing-values, 4);
+
+  @include mobile {
+    padding: map-get($spacing-values, 3);
+  }
+}
+
+// Responsive Card Mixin
+// -----------------------------------------------------------------------------
+@mixin responsive-card {
+  // Mobile styles
+  @include mobile {
+    padding: map-get($spacing-values, 2);
+    margin-bottom: map-get($spacing-values, 2);
+  }
+
+  // Tablet styles
+  @include tablet {
+    padding: map-get($spacing-values, 3);
+    margin-bottom: map-get($spacing-values, 3);
+  }
+
+  // Desktop styles
+  @include desktop {
+    padding: map-get($spacing-values, 4);
+    margin-bottom: map-get($spacing-values, 3);
+  }
+}
