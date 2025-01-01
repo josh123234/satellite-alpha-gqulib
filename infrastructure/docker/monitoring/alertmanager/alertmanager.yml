@@ -1,0 +1,145 @@
+# Alertmanager v0.25.0 Configuration
+# Comprehensive alert management configuration for SaaS Management Platform
+
+global:
+  # How long to wait before sending a notification about new alerts that are grouped together
+  resolve_timeout: 5m
+  
+  # Email (SMTP) settings
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@saasplatform.com'
+  smtp_auth_username: '${SMTP_AUTH_USERNAME}'
+  smtp_auth_password: '${SMTP_AUTH_PASSWORD}'
+  
+  # Slack webhook URL for notifications
+  slack_api_url: '${SLACK_API_URL}'
+  
+  # PagerDuty API endpoint
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # HTTP client configuration
+  http_config:
+    tls_config:
+      insecure_skip_verify: false
+
+# Route tree for alert notifications
+route:
+  # The default receiver if no routes match
+  receiver: 'default-receiver'
+  
+  # Initial wait time before sending notifications for a new group
+  group_wait: '30s'
+  
+  # How long to wait before sending notifications about new alerts that are added to a group
+  group_interval: '5m'
+  
+  # How long to wait before re-sending a notification
+  repeat_interval: '4h'
+
+  # Child routes for specific alert types
+  routes:
+    # Critical security alerts route
+    - match:
+        severity: 'critical'
+        alert_type: 'security'
+      receiver: 'pagerduty-security'
+      group_wait: '0s'
+      repeat_interval: '30m'
+
+    # Critical system alerts route
+    - match:
+        severity: 'critical'
+        alert_type: 'system'
+      receiver: 'pagerduty-critical'
+      group_wait: '0s'
+      repeat_interval: '1h'
+
+    # Security monitoring alerts route
+    - match_re:
+        alert_type: 'login_failure|api_usage|data_access|config_change'
+      receiver: 'security-team'
+      group_by: ['alertname', 'instance', 'alert_type']
+      group_wait: '30s'
+      repeat_interval: '2h'
+
+    # Warning level alerts route
+    - match:
+        severity: 'warning'
+      receiver: 'slack-warnings'
+      group_wait: '1m'
+      repeat_interval: '4h'
+
+# Notification receivers configuration
+receivers:
+  # Default notification receiver
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'team@saasplatform.com'
+        send_resolved: true
+        html: '{{ template "email.default.html" . }}'
+
+  # Security incidents PagerDuty receiver
+  - name: 'pagerduty-security'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SECURITY_KEY}'
+        send_resolved: true
+        severity: '{{ .CommonLabels.severity }}'
+        class: '{{ .CommonLabels.alert_type }}'
+        group_key: '{{ .GroupKey }}'
+        dedup_key: '{{ .CommonLabels.alertname }}'
+
+  # Critical system issues PagerDuty receiver
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_CRITICAL_KEY}'
+        send_resolved: true
+        severity: '{{ .CommonLabels.severity }}'
+        class: 'system'
+        group_key: '{{ .GroupKey }}'
+        dedup_key: '{{ .CommonLabels.alertname }}'
+
+  # Security team Slack receiver
+  - name: 'security-team'
+    slack_configs:
+      - channel: '#security-alerts'
+        send_resolved: true
+        title: '{{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Type:* {{ .Labels.alert_type }}
+          {{ end }}
+
+  # Warning alerts Slack receiver
+  - name: 'slack-warnings'
+    slack_configs:
+      - channel: '#system-warnings'
+        send_resolved: true
+        title: '{{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Warning:* {{ .Annotations.description }}
+          *Instance:* {{ .Labels.instance }}
+          {{ end }}
+
+# Inhibition rules to prevent alert spam
+inhibit_rules:
+  # Inhibit warning alerts when there's a critical security alert for the same instance
+  - source_match:
+      severity: 'critical'
+      alert_type: 'security'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance', 'job']
+
+  # Inhibit performance alerts when there are major system issues
+  - source_match_re:
+      alert_type: 'system_down|network_partition'
+    target_match_re:
+      alert_type: 'high_latency|high_error_rate'
+    equal: ['instance', 'job']
+
+# Custom notification templates
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
