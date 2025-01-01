@@ -1,0 +1,200 @@
+// =============================================================================
+// Grid System
+// Core grid system implementing a responsive 12-column layout with modern
+// CSS Grid features and specialized widget grid support
+// =============================================================================
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// Functions
+// -----------------------------------------------------------------------------
+
+/// Calculate column width as a percentage
+/// @param {Number} $columns - Number of columns to span
+/// @return {Number} Column width as percentage
+@function calculate-column-width($columns) {
+  @if type-of($columns) != 'number' {
+    @error 'columns must be a number, received: #{type-of($columns)}';
+  }
+  
+  @if $columns > $grid-columns {
+    @error 'columns must be less than or equal to #{$grid-columns}, received: #{$columns}';
+  }
+  
+  @return percentage($columns / $grid-columns);
+}
+
+// Mixins
+// -----------------------------------------------------------------------------
+
+/// Generate column styles
+/// @param {Number} $size - Column size
+/// @param {Number} $columns - Total number of columns
+@mixin make-col($size, $columns: $grid-columns) {
+  flex: 0 0 calculate-column-width($size);
+  max-width: calculate-column-width($size);
+  padding-right: $grid-gutter;
+  padding-left: $grid-gutter;
+  
+  // Modern CSS Grid support
+  @supports (display: grid) {
+    grid-column: span $size;
+  }
+}
+
+/// Generate complete grid system
+@mixin make-grid {
+  @for $i from 1 through $grid-columns {
+    .col-#{$i} {
+      @include make-col($i);
+    }
+    
+    // Responsive column classes
+    @include mobile {
+      .col-mobile-#{$i} {
+        @include make-col($i);
+      }
+    }
+    
+    @include tablet {
+      .col-tablet-#{$i} {
+        @include make-col($i);
+      }
+    }
+    
+    @include desktop {
+      .col-desktop-#{$i} {
+        @include make-col($i);
+      }
+    }
+  }
+}
+
+// Base Container
+// -----------------------------------------------------------------------------
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 $grid-gutter;
+  
+  // Container query support
+  @supports (container-type: inline-size) {
+    container-type: inline-size;
+    container-name: main-container;
+  }
+  
+  // Responsive container max-widths
+  @include mobile {
+    max-width: map-get($breakpoints, mobile);
+  }
+  
+  @include tablet {
+    max-width: map-get($breakpoints, tablet);
+  }
+  
+  @include desktop {
+    max-width: map-get($breakpoints, desktop);
+  }
+}
+
+// Widget Container
+// -----------------------------------------------------------------------------
+.container--widget {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: $grid-gutter;
+  
+  // Responsive adjustments
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+  
+  @include tablet {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+// Row Layouts
+// -----------------------------------------------------------------------------
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 (-$grid-gutter);
+  
+  // Equal height modifier
+  &--equal-height {
+    align-items: stretch;
+  }
+  
+  // Modern CSS Grid layout
+  &--grid {
+    display: grid;
+    grid-template-columns: repeat($grid-columns, 1fr);
+    gap: $grid-gutter;
+    margin: 0;
+    
+    // Responsive grid adjustments
+    @include mobile {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    @include tablet {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  }
+}
+
+// Column Base Styles
+// -----------------------------------------------------------------------------
+[class^="col-"] {
+  position: relative;
+  width: 100%;
+  min-height: 1px;
+}
+
+// Generate Grid System
+// -----------------------------------------------------------------------------
+@include make-grid;
+
+// Alignment Utilities
+// -----------------------------------------------------------------------------
+.justify-content {
+  &-start { justify-content: flex-start; }
+  &-center { justify-content: center; }
+  &-end { justify-content: flex-end; }
+  &-between { justify-content: space-between; }
+  &-around { justify-content: space-around; }
+}
+
+.align-items {
+  &-start { align-items: flex-start; }
+  &-center { align-items: center; }
+  &-end { align-items: flex-end; }
+  &-stretch { align-items: stretch; }
+}
+
+// Gap Utilities
+// -----------------------------------------------------------------------------
+.gap {
+  &-0 { gap: 0; }
+  &-1 { gap: $grid-gutter; }
+  &-2 { gap: $grid-gutter * 2; }
+  &-3 { gap: $grid-gutter * 3; }
+}
+
+// Order Utilities
+// -----------------------------------------------------------------------------
+@for $i from 1 through 12 {
+  .order-#{$i} {
+    order: $i;
+  }
+}
+
+// Offset Utilities
+// -----------------------------------------------------------------------------
+@for $i from 0 through ($grid-columns - 1) {
+  .offset-#{$i} {
+    margin-left: if($i > 0, calculate-column-width($i), 0);
+  }
+}
