@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": {
+    "type": "monorepo",
+    "autoDetect": true
+  },
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "tsconfig.json",
+    "webpackConfigPath": "webpack.config.js",
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "classValidatorShim": true,
+          "introspectComments": true,
+          "dtoFileNameSuffix": [
+            ".dto.ts",
+            ".entity.ts"
+          ],
+          "controllerFileNameSuffix": ".controller.ts",
+          "dtoKeyOfComment": "description",
+          "controllerKeyOfComment": "description"
+        }
+      }
+    ]
+  },
+  "projects": {
+    "discovery-service": {
+      "type": "application",
+      "root": "src/discovery",
+      "entryFile": "main",
+      "sourceRoot": "src/discovery",
+      "compilerOptions": {
+        "tsConfigPath": "src/discovery/tsconfig.json",
+        "assets": [
+          "**/*.proto",
+          "**/*.json"
+        ],
+        "watchAssets": true
+      }
+    },
+    "analytics-service": {
+      "type": "application",
+      "root": "src/analytics",
+      "entryFile": "main",
+      "sourceRoot": "src/analytics",
+      "compilerOptions": {
+        "tsConfigPath": "src/analytics/tsconfig.json",
+        "assets": [
+          "**/*.json"
+        ],
+        "watchAssets": true
+      }
+    },
+    "ai-service": {
+      "type": "application",
+      "root": "src/ai",
+      "entryFile": "main",
+      "sourceRoot": "src/ai",
+      "compilerOptions": {
+        "tsConfigPath": "src/ai/tsconfig.json",
+        "assets": [
+          "**/*.json",
+          "**/*.model"
+        ],
+        "watchAssets": true
+      }
+    },
+    "notification-service": {
+      "type": "application",
+      "root": "src/notification",
+      "entryFile": "main",
+      "sourceRoot": "src/notification",
+      "compilerOptions": {
+        "tsConfigPath": "src/notification/tsconfig.json",
+        "assets": [
+          "**/*.json",
+          "**/*.template"
+        ],
+        "watchAssets": true
+      }
+    }
+  }
+}
