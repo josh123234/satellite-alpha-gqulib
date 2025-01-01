@@ -1,0 +1,180 @@
+<div class="analytics-container" role="main" aria-label="Analytics Dashboard">
+  <!-- Header Section -->
+  <header class="analytics-header">
+    <h1 class="analytics-title" tabindex="0">Cost Analytics</h1>
+    <mat-select 
+      [(ngModel)]="selectedPeriod" 
+      (selectionChange)="onPeriodChange($event.value)"
+      aria-label="Select time period"
+      role="combobox"
+      class="period-selector">
+      <mat-option value="1m">Last Month</mat-option>
+      <mat-option value="3m">Last 3 Months</mat-option>
+      <mat-option value="6m">Last 6 Months</mat-option>
+      <mat-option value="12m">Last 12 Months</mat-option>
+    </mat-select>
+  </header>
+
+  <!-- Main Analytics Content -->
+  <div class="analytics-content" *ngIf="!isLoading && !error" role="region" aria-live="polite">
+    <!-- Cost Analysis Section -->
+    <section class="cost-analysis-section" role="region" aria-label="Cost Analysis">
+      <app-cost-analysis
+        [costData]="costAnalysisData"
+        (timeRangeChange)="onTimeRangeChange($event)"
+        role="region"
+        aria-label="Cost Analysis Chart">
+      </app-cost-analysis>
+    </section>
+
+    <!-- Usage Trends Section -->
+    <section class="usage-trends-section" role="region" aria-label="Usage Trends">
+      <app-usage-trends
+        [subscriptionId]="selectedSubscriptionId"
+        [metricType]="selectedMetricType"
+        role="region"
+        aria-label="Usage Trends Chart">
+      </app-usage-trends>
+    </section>
+
+    <!-- Department Breakdown Section -->
+    <section class="department-breakdown-section" role="region" aria-label="Department Cost Breakdown">
+      <app-department-breakdown
+        [departmentCosts]="departmentBreakdownData"
+        role="region"
+        aria-label="Department Cost Breakdown Chart">
+      </app-department-breakdown>
+    </section>
+  </div>
+
+  <!-- Loading State -->
+  <div 
+    class="loading-overlay" 
+    *ngIf="isLoading"
+    role="alert"
+    aria-live="polite">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="48"
+      role="progressbar"
+      aria-label="Loading analytics data">
+    </mat-progress-spinner>
+    <span class="loading-text">Loading analytics data...</span>
+  </div>
+
+  <!-- Error State -->
+  <div 
+    class="error-container" 
+    *ngIf="error"
+    role="alert"
+    aria-live="assertive">
+    <p class="error-message">{{error}}</p>
+    <button 
+      class="retry-button"
+      (click)="retryLoad()"
+      aria-label="Retry loading data">
+      <span class="material-icons">refresh</span>
+      Retry
+    </button>
+  </div>
+</div>
+
+<style>
+  .analytics-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+  }
+
+  .analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .analytics-title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #1F2937;
+    margin: 0;
+  }
+
+  .period-selector {
+    min-width: 200px;
+  }
+
+  .analytics-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    height: calc(100% - 80px);
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .loading-text {
+    color: #4B5563;
+    font-size: 16px;
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    background: #FEE2E2;
+    border-radius: 8px;
+    margin: 24px;
+  }
+
+  .error-message {
+    color: #DC2626;
+    margin-bottom: 16px;
+  }
+
+  .retry-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .retry-button:hover {
+    background: #B91C1C;
+  }
+
+  @media (max-width: 768px) {
+    .analytics-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .analytics-content {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
