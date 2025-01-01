@@ -1,0 +1,51 @@
+[BINARY CONTENT - ICO File Format]
+
+Technical specifications for favicon.ico:
+
+File Format: ICO (Windows Icon)
+File Size: ≤ 5KB
+Color Depth: 32-bit (True Color + Alpha)
+
+Image Sizes Included:
+- 16x16 pixels (browser tabs, URLs)
+- 32x32 pixels (standard favicon)
+- 48x48 pixels (high-DPI displays)
+
+Color Values:
+- Primary: #2563EB (Brand Blue)
+- Secondary: #3B82F6
+- Accent: #60A5FA
+- Background: Transparent
+
+Design Elements:
+- Clean, minimalist "S" letterform
+- Rounded corners for modern aesthetic
+- Solid fill with subtle gradient
+- Transparent background for dark/light modes
+- Clear silhouette at all sizes
+- 1px padding at each size for visual clarity
+
+Optimization:
+- PNG compression for each size
+- Optimized color palette
+- Minimal anchor points
+- Total file size under 5KB
+
+Browser Support:
+- Chrome: All versions
+- Firefox: All versions
+- Safari: All versions
+- Edge: All versions
+
+Cache Configuration:
+Cache-Control: public, max-age=31536000
+ETag: Enabled
+Version: Updated with brand changes
+
+Accessibility:
+- 4.5:1 minimum contrast ratio
+- Colorblind-friendly design
+- Distinct silhouette
+- Clear at small sizes
+
+[End of binary file specifications]
