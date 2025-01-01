@@ -1,0 +1,118 @@
+// =============================================================================
+// Design System Variables
+// Core SCSS variables defining the design system tokens for the SaaS Management Platform
+// =============================================================================
+
+// Typography
+// -----------------------------------------------------------------------------
+// Primary font: Inter for general UI
+// Monospace: Source Code Pro for code/technical content
+$font-family-primary: "Inter", system-ui, -apple-system, sans-serif;
+$font-family-mono: "Source Code Pro", monospace;
+
+// Base font size
+$font-size-base: 16px;
+
+// Font size scale
+$font-sizes: (
+  h1: 32px,
+  h2: 24px,
+  h3: 20px,
+  h4: 18px,
+  h5: 16px,
+  body: 16px,
+  small: 14px
+);
+
+// Font weights
+$font-weights: (
+  regular: 400,
+  medium: 500,
+  bold: 700
+);
+
+// Colors
+// -----------------------------------------------------------------------------
+// Brand colors as specified in design system
+$color-primary: #2563EB;    // Primary brand color
+$color-secondary: #3B82F6;  // Secondary brand color
+$color-accent: #60A5FA;     // Accent color
+$color-error: #EF4444;      // Error/danger color
+
+// Additional semantic colors
+$color-success: #10B981;    // Success/positive feedback
+$color-warning: #F59E0B;    // Warning/caution
+$color-info: #3B82F6;       // Information/neutral feedback
+
+// Spacing
+// -----------------------------------------------------------------------------
+// Base spacing unit of 8px
+$spacing-base: 8px;
+
+// Spacing scale multipliers
+$spacing-scale: (
+  xs: 1,    // 8px
+  sm: 2,    // 16px
+  md: 3,    // 24px
+  lg: 4,    // 32px
+  xl: 6     // 48px
+);
+
+// Absolute spacing values
+$spacing-values: (
+  0: 0,
+  1: 8px,
+  2: 16px,
+  3: 24px,
+  4: 32px,
+  6: 48px
+);
+
+// Breakpoints
+// -----------------------------------------------------------------------------
+// Responsive design breakpoints
+$breakpoints: (
+  mobile: 640px,    // Mobile devices
+  tablet: 1024px,   // Tablet devices
+  desktop: 1440px   // Desktop screens
+);
+
+// Grid
+// -----------------------------------------------------------------------------
+// 12-column grid system with 8px gutters
+$grid-columns: 12;
+$grid-gutter: 8px;
+
+// Elevation
+// -----------------------------------------------------------------------------
+// Shadow depths for different UI layers
+$elevation-levels: (
+  surface: 0,   // Base surface level
+  card: 2,      // Card elements
+  dialog: 4,    // Dialog/popover elements
+  modal: 8      // Modal overlays
+);
+
+// Z-index
+// -----------------------------------------------------------------------------
+// Z-index scale for layering elements
+$z-index-levels: (
+  dropdown: 1000,
+  sticky: 1020,
+  fixed: 1030,
+  modal-backdrop: 1040,
+  modal: 1050,
+  popover: 1060,
+  tooltip: 1070
+);
+
+// Transitions
+// -----------------------------------------------------------------------------
+// Animation durations and timing functions
+$transition-duration: (
+  fast: 150ms,
+  normal: 250ms,
+  slow: 350ms
+);
+
+$transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
