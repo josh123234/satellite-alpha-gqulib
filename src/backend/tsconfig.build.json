@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "**/*test.ts",
+    "**/__mocks__/*"
+  ],
+  "compilerOptions": {
+    "sourceMap": false,
+    "incremental": true,
+    "skipLibCheck": true,
+    "removeComments": true,
+    "optimization": true,
+    "inlineSources": false,
+    "inlineSourceMap": false,
+    "declarationMap": false
+  }
+}
