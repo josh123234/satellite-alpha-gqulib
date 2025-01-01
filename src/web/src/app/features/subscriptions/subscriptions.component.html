@@ -1,0 +1,116 @@
+<div class="subscriptions-container" role="main" aria-label="Subscriptions Management">
+  <!-- Header Section -->
+  <header class="subscriptions-header">
+    <nav class="breadcrumb" aria-label="Breadcrumb navigation">
+      <ol>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li aria-current="page">Subscriptions</li>
+      </ol>
+    </nav>
+
+    <div class="actions-container">
+      <div class="search-wrapper">
+        <input 
+          type="search" 
+          placeholder="Search subscriptions..." 
+          aria-label="Search subscriptions"
+          class="search-input"
+          (input)="onFilter($event)">
+      </div>
+
+      <app-button
+        variant="primary"
+        [loading]="addLoading$ | async"
+        [disabled]="(loading$ | async) === true"
+        (clicked)="onAddSubscription()"
+        aria-label="Add new subscription">
+        <i class="icon-plus" aria-hidden="true"></i>
+        Add New
+      </app-button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="subscriptions-content">
+    <!-- Loading State -->
+    <div *ngIf="loading$ | async" class="loading-overlay" aria-live="polite">
+      <div class="spinner" role="status">
+        <span class="sr-only">Loading subscriptions...</span>
+      </div>
+    </div>
+
+    <!-- Subscription List -->
+    <app-subscription-list
+      *ngIf="subscriptions$ | async as subscriptions"
+      [subscriptions]="subscriptions"
+      [loading]="loading$ | async"
+      [virtualScroll]="true"
+      (selectionChange)="onSelectionChange($event)"
+      (sortChange)="onSort($event)"
+      aria-label="Subscriptions list">
+    </app-subscription-list>
+
+    <!-- Batch Operations -->
+    <div class="batch-operations" *ngIf="selectedItems$ | async as selectedItems">
+      <ng-container *ngIf="selectedItems.length > 0">
+        <app-button
+          variant="secondary"
+          size="sm"
+          (clicked)="onBatchRenewal()"
+          aria-label="Renew selected subscriptions">
+          Renew Selected
+        </app-button>
+        
+        <app-button
+          variant="secondary"
+          size="sm"
+          (clicked)="onBatchOptimize()"
+          aria-label="Optimize selected subscriptions">
+          Optimize
+        </app-button>
+
+        <app-button
+          variant="error"
+          size="sm"
+          (clicked)="onBatchCancel()"
+          aria-label="Cancel selected subscriptions">
+          Cancel
+        </app-button>
+      </ng-container>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="subscriptions-footer">
+    <div class="pagination-container">
+      <app-pagination
+        [config]="{
+          totalItems: (totalItems$ | async) || 0,
+          itemsPerPage: pageSize,
+          currentPage: currentPage,
+          pageSizeOptions: [10, 20, 50, 100],
+          showTotalPages: true
+        }"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+
+    <div class="export-container">
+      <app-button
+        variant="secondary"
+        size="sm"
+        [disabled]="(loading$ | async) === true"
+        (clicked)="onExport('csv')"
+        aria-label="Export to CSV">
+        <i class="icon-download" aria-hidden="true"></i>
+        Export CSV
+      </app-button>
+    </div>
+  </footer>
+</div>
+
+<!-- Accessibility Enhancement -->
+<div aria-live="polite" class="sr-only" role="status">
+  {{ (selectedItems$ | async)?.length || 0 }} subscriptions selected
+</div>
