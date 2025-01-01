@@ -1,0 +1,81 @@
+<div class="ai-assistant-container" role="main" aria-label="AI Assistant Interface">
+  <!-- Header Section -->
+  <header class="ai-assistant-header" role="banner">
+    <h1 class="header-title">AI Assistant</h1>
+  </header>
+
+  <!-- Chat Interface Section -->
+  <section class="chat-section" role="region" aria-label="Chat Interface">
+    <app-chat-interface
+      [messages]="messages$ | async"
+      [chatForm]="chatForm"
+      [error]="error$ | async"
+      (sendMessage)="onSendMessage($event)"
+      aria-live="polite">
+    </app-chat-interface>
+  </section>
+
+  <!-- AI Insights Section -->
+  <section 
+    class="insights-section" 
+    role="complementary" 
+    aria-label="AI Insights"
+    *ngIf="(insights$ | async)?.length > 0">
+    <h2 class="insights-title">Generated Insights</h2>
+    <div class="insights-grid">
+      <app-insight-card
+        *ngFor="let insight of insights$ | async; trackBy: trackByInsightId"
+        [insight]="insight"
+        (takeAction)="onTakeAction($event)"
+        (dismiss)="onDismissInsight($event)"
+        (viewDetails)="onViewDetails($event)"
+        [attr.aria-label]="'Insight: ' + insight.title"
+        role="article">
+      </app-insight-card>
+    </div>
+  </section>
+
+  <!-- Empty State -->
+  <div 
+    class="empty-state"
+    *ngIf="!(insights$ | async)?.length && !(isLoading$ | async)"
+    role="status"
+    aria-live="polite">
+    <mat-icon class="empty-state-icon">lightbulb_outline</mat-icon>
+    <p class="empty-state-text">No insights available yet. Start a conversation to get recommendations.</p>
+  </div>
+
+  <!-- Loading State -->
+  <app-loader
+    *ngIf="isLoading$ | async"
+    size="medium"
+    [overlay]="true"
+    message="Processing your request..."
+    aria-label="Loading AI insights">
+  </app-loader>
+
+  <!-- Error State -->
+  <div 
+    class="error-state"
+    *ngIf="error$ | async as error"
+    role="alert"
+    aria-live="assertive">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p class="error-message">{{ error.message }}</p>
+    <button 
+      mat-button 
+      color="primary"
+      (click)="retryConnection()"
+      aria-label="Retry connection">
+      Retry
+    </button>
+  </div>
+</div>
+
+<!-- Accessibility Skip Link -->
+<a 
+  href="#chat-input" 
+  class="skip-link"
+  tabindex="0">
+  Skip to chat input
+</a>
