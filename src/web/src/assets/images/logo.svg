@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     viewBox="0 0 240 80" 
+     role="img"
+     aria-label="SaaS Management Platform Logo">
+    
+    <title>SaaS Management Platform Logo</title>
+    <desc>Official logo of the SaaS Management Platform featuring a modern, abstract design in the primary brand color</desc>
+    
+    <!-- Background shape representing software integration -->
+    <path d="M40 20 
+             A20 20 0 0 1 60 40
+             L60 60
+             A20 20 0 0 1 40 80
+             L20 80
+             A20 20 0 0 1 0 60
+             L0 40
+             A20 20 0 0 1 20 20
+             Z" 
+          fill="#2563EB"
+          opacity="0.9"/>
+    
+    <!-- Central connecting elements -->
+    <path d="M80 30
+             L160 30
+             A10 10 0 0 1 170 40
+             L170 50
+             A10 10 0 0 1 160 60
+             L80 60
+             A10 10 0 0 1 70 50
+             L70 40
+             A10 10 0 0 1 80 30
+             Z"
+          fill="#2563EB"
+          opacity="0.8"/>
+    
+    <!-- Management indicator circles -->
+    <circle cx="190" cy="40" r="15" fill="#2563EB" opacity="0.7"/>
+    <circle cx="220" cy="40" r="15" fill="#2563EB" opacity="0.6"/>
+    
+    <!-- Accessibility enhancement elements -->
+    <path d="M40 35
+             L40 45
+             A5 5 0 0 0 45 50
+             L55 50
+             A5 5 0 0 0 60 45
+             L60 35
+             Z"
+          fill="white"
+          opacity="0.9"/>
+    
+    <!-- High contrast decorative elements -->
+    <rect x="85" y="40" width="30" height="4" fill="white" opacity="0.8"/>
+    <rect x="125" y="40" width="30" height="4" fill="white" opacity="0.8"/>
+    
+    <!-- Metadata -->
+    <metadata>
+        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                 xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <rdf:Description>
+                <dc:title>SaaS Management Platform Logo</dc:title>
+                <dc:creator>SaaS Management Platform</dc:creator>
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type>Logo</dc:type>
+            </rdf:Description>
+        </rdf:RDF>
+    </metadata>
+    
+    <!-- Style definitions for better browser compatibility -->
+    <style>
+        @media (prefers-reduced-motion: reduce) {
+            path, circle, rect {
+                transition: none !important;
+            }
+        }
+    </style>
+    
+    <!-- Fallback handling -->
+    <switch>
+        <g requiredFeatures="http://www.w3.org/Graphics/SVG/feature/1.1">
+            <!-- SVG content is supported -->
+        </g>
+        <image xlink:href="logo-fallback.png" 
+               width="240" 
+               height="80" 
+               src="logo-fallback.png"/>
+    </switch>
+</svg>
