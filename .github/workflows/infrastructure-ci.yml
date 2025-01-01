@@ -1,0 +1,255 @@
+name: Infrastructure CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'infrastructure/terraform/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'infrastructure/terraform/**'
+
+# Prevent concurrent executions of the same workflow
+concurrency:
+  group: infrastructure-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_VERSION: '1.5.0'
+  TFSEC_VERSION: 'v1.28.1'
+  CHECKOV_VERSION: '2.3.187'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  TF_IN_AUTOMATION: 'true'
+
+jobs:
+  terraform-validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Cache Terraform plugins
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          
+      - name: Initialize Terraform
+        working-directory: infrastructure/terraform
+        run: |
+          terraform init -backend=false
+          
+      - name: Check formatting
+        working-directory: infrastructure/terraform
+        run: terraform fmt -check -recursive
+        
+      - name: Validate configurations
+        working-directory: infrastructure/terraform
+        run: terraform validate
+        
+      - name: Generate documentation
+        working-directory: infrastructure/terraform
+        run: |
+          curl -Lo ./terraform-docs https://github.com/terraform-docs/terraform-docs/releases/latest/download/terraform-docs-linux-amd64
+          chmod +x ./terraform-docs
+          ./terraform-docs markdown . > TERRAFORM.md
+
+  security-scan:
+    name: Security Scanning
+    needs: terraform-validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: infrastructure/terraform
+          format: sarif
+          additional_args: >
+            --minimum-severity HIGH
+            --config-file .tfsec.yml
+            --out tfsec-results.sarif
+            
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infrastructure/terraform
+          framework: terraform
+          output_format: sarif
+          output_file: checkov-results.sarif
+          soft_fail: true
+          
+      - name: Upload security results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: infrastructure/terraform/tfsec-results.sarif
+          category: infrastructure-security
+          
+      - name: Generate security summary
+        run: |
+          echo "## Infrastructure Security Scan Results" > security-summary.md
+          echo "### TFSec Findings" >> security-summary.md
+          jq -r '.runs[].results[] | "- " + .level + ": " + .message' tfsec-results.sarif >> security-summary.md
+          echo "### Checkov Findings" >> security-summary.md
+          jq -r '.runs[].results[] | "- " + .level + ": " + .message' checkov-results.sarif >> security-summary.md
+
+  plan-dev:
+    name: Plan Development
+    needs: security-scan
+    runs-on: ubuntu-latest
+    environment: development
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Initialize Terraform
+        working-directory: infrastructure/terraform
+        run: terraform init
+        
+      - name: Select workspace
+        working-directory: infrastructure/terraform
+        run: terraform workspace select dev || terraform workspace new dev
+        
+      - name: Generate plan
+        working-directory: infrastructure/terraform
+        run: |
+          terraform plan \
+            -var-file="environments/dev.tfvars" \
+            -out=dev-plan.tfplan \
+            -detailed-exitcode
+            
+      - name: Save plan artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dev-plan
+          path: infrastructure/terraform/dev-plan.tfplan
+          retention-days: 5
+
+  plan-staging:
+    name: Plan Staging
+    needs: security-scan
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Initialize Terraform
+        working-directory: infrastructure/terraform
+        run: terraform init
+        
+      - name: Select workspace
+        working-directory: infrastructure/terraform
+        run: terraform workspace select staging || terraform workspace new staging
+        
+      - name: Generate plan
+        working-directory: infrastructure/terraform
+        run: |
+          terraform plan \
+            -var-file="environments/staging.tfvars" \
+            -out=staging-plan.tfplan \
+            -detailed-exitcode
+            
+      - name: Save plan artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: staging-plan
+          path: infrastructure/terraform/staging-plan.tfplan
+          retention-days: 5
+
+  plan-prod:
+    name: Plan Production
+    if: github.ref == 'refs/heads/main'
+    needs: security-scan
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Initialize Terraform
+        working-directory: infrastructure/terraform
+        run: terraform init
+        
+      - name: Select workspace
+        working-directory: infrastructure/terraform
+        run: terraform workspace select prod || terraform workspace new prod
+        
+      - name: Generate plan
+        working-directory: infrastructure/terraform
+        run: |
+          terraform plan \
+            -var-file="environments/prod.tfvars" \
+            -out=prod-plan.tfplan \
+            -detailed-exitcode
+            
+      - name: Save plan artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: prod-plan
+          path: infrastructure/terraform/prod-plan.tfplan
+          retention-days: 5
+          
+      - name: Require approvals
+        if: success()
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.token }}
+          approvers: required-approvers.txt
+          minimum-approvals: 2
+          issue-title: "Production Infrastructure Changes Require Approval"
+          issue-body: "Please review the infrastructure changes for production deployment"
+          exclude-workflow-initiator-as-approver: true
+
+  notify:
+    name: Send Notifications
+    needs: [plan-dev, plan-staging, plan-prod]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          text: "Infrastructure CI Workflow Status: ${{ job.status }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
